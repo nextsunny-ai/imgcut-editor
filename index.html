@@ -1529,7 +1529,10 @@ a:hover { text-decoration: underline; }
       <div class="tab-panel" id="panel-preview" style="display:none; flex:1; flex-direction:column;">
         <div class="preview-toolbar">
           <span style="font-size:13px; color:var(--text2);" data-i18n="preview.toolbar.note">변경사항이 반영된 최종 결과물</span>
-          <button class="btn btn-ghost btn-sm" onclick="refreshPreview()" data-i18n="preview.refresh">새로고침</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-sm" onclick="openPreviewWindow()" data-i18n="preview.openWindow" title="새 창에서 보기 — 갈음·수정 시 자동 갱신">새 창에서 보기</button>
+            <button class="btn btn-ghost btn-sm" onclick="refreshPreview()" data-i18n="preview.refresh">새로고침</button>
+          </div>
         </div>
         <iframe id="preview-iframe" style="flex:1; border:none; background:#fff;"></iframe>
       </div>
@@ -1882,6 +1885,9 @@ const I18N = {
     'filter.edited': '수정됨',
     'preview.toolbar.note': '변경사항이 반영된 최종 결과물',
     'preview.refresh': '새로고침',
+    'preview.openWindow': '새 창에서 보기',
+    'msg.previewWindowOpen': '새 창 미리보기 열림. 갈음·수정 시 자동 갱신됩니다.',
+    'msg.noFileLoaded': '먼저 파일을 불러오세요',
     // 카드 액션
     'card.replace': '교체',
     'card.size': '크기',
@@ -2071,6 +2077,9 @@ const I18N = {
     'filter.edited': 'Edited',
     'preview.toolbar.note': 'Live preview with edits applied',
     'preview.refresh': 'Refresh',
+    'preview.openWindow': 'Open in new window',
+    'msg.previewWindowOpen': 'Preview opened in new window. Auto-refreshes on edits.',
+    'msg.noFileLoaded': 'Load a file first',
     // Card actions
     'card.replace': 'Replace',
     'card.size': 'Size',
@@ -2838,8 +2847,12 @@ function switchTab(tab) {
 }
 
 // ════════════════════════════════════
-//  미리보기
+//  미리보기 (iframe + 새 창)
 // ════════════════════════════════════
+let previewWindow = null;        // 새 창 reference (= window.open 반환)
+let previewWindowUrl = null;     // 직전 blob URL (= revoke용)
+let previewWindowTimer = null;   // 자동 갱신 debounce
+
 async function refreshPreview() {
   const iframe = document.getElementById('preview-iframe');
   showProg(t('prog.previewMaking'), 40);
@@ -2852,7 +2865,61 @@ async function refreshPreview() {
     const url = URL.createObjectURL(blob);
     iframe.onload = () => { URL.revokeObjectURL(url); hideProg(); };
     iframe.src = url;
+    // 새 창도 열려있으면 = 동시 갱신
+    refreshPreviewWindow();
   } catch(e) { hideProg(); toast('미리보기 오류: '+e.message); }
+}
+
+// 새 창 열기 (= 보면서 갈아끼우기)
+async function openPreviewWindow() {
+  try {
+    if (!currentHtml) { toast(t('msg.noFileLoaded') || '먼저 파일을 불러오세요'); return; }
+    showProg(t('prog.previewMaking'), 40); await tick();
+    const html = await buildHtml();
+    setProg('렌더링 중...', 80); await tick();
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    // 옛 창 살아있으면 = 그 창의 URL만 갱신. 없으면 = 새 창 열기.
+    if (previewWindow && !previewWindow.closed) {
+      if (previewWindowUrl) try { URL.revokeObjectURL(previewWindowUrl); } catch (e) {}
+      previewWindow.location.href = url;
+      previewWindow.focus();
+    } else {
+      previewWindow = window.open(url, 'sunnyEditorPreview', 'width=1280,height=800,resizable=yes,scrollbars=yes');
+      if (!previewWindow) {
+        hideProg();
+        toast((typeof currentLang !== 'undefined' && currentLang === 'en')
+          ? 'Popup blocked. Allow popups for sunnyeditor.com.'
+          : '팝업 차단됨. 브라우저에서 sunnyeditor.com 팝업 허용해주세요.');
+        URL.revokeObjectURL(url);
+        return;
+      }
+    }
+    previewWindowUrl = url;
+    hideProg();
+    toast(t('msg.previewWindowOpen') || '새 창 미리보기 열림. 갈음·수정 시 자동 갱신됩니다.');
+  } catch (e) {
+    hideProg();
+    toast('미리보기 오류: ' + e.message);
+  }
+}
+
+// 새 창 자동 갱신 (= 편집 후 호출). debounce로 빈번한 갱신 방지
+function refreshPreviewWindow() {
+  if (!previewWindow || previewWindow.closed) return;
+  if (previewWindowTimer) clearTimeout(previewWindowTimer);
+  previewWindowTimer = setTimeout(async () => {
+    try {
+      const html = await buildHtml();
+      const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      if (previewWindow && !previewWindow.closed) {
+        if (previewWindowUrl) try { URL.revokeObjectURL(previewWindowUrl); } catch (e) {}
+        previewWindow.location.replace(url);
+        previewWindowUrl = url;
+      }
+    } catch (e) { /* silent */ }
+  }, 600);
 }
 
 // ════════════════════════════════════
@@ -3936,6 +4003,8 @@ function syncStats() {
   setVal('s-changed', d + r + te + td + rs);
   syncTabCounts();
   scheduleAutosave();
+  // 새 창 미리보기 = 살아있으면 자동 갱신 (= debounce 600ms 안)
+  if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
 }
 
 // 탭 라벨 옆 카운트 갱신 (이미지 5 · 텍스트 19)
