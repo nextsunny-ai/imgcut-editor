@@ -11,6 +11,12 @@
 <meta property="og:image" content="./og-image.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<link rel="manifest" href="./manifest.json">
+<meta name="application-name" content="SUNNY EDITOR">
+<meta name="apple-mobile-web-app-title" content="SUNNY EDITOR">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -425,6 +431,13 @@ function setLang(lang) {
   gApply();
   if (gLang==='en') document.title = 'User guide — SUNNY EDITOR';
 })();
+
+// PWA SW 등록 (오프라인 캐싱)
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
 </script>
 
 </body>

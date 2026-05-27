@@ -1,0 +1,37 @@
+{
+  "name": "써니에디터 / SUNNY EDITOR",
+  "short_name": "SUNNY EDITOR",
+  "description": "Edit images and text in a finished HTML page — no code. 완성된 HTML 페이지의 이미지·텍스트를 코드 없이 한 번에 편집.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "ko",
+  "dir": "ltr",
+  "background_color": "#FAFAFA",
+  "theme_color": "#FAFAFA",
+  "categories": ["productivity", "developer", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "에디터 / Editor",
+      "short_name": "Editor",
+      "url": "/?source=shortcut",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "사용 가이드 / User guide",
+      "short_name": "Guide",
+      "url": "/guide.html?source=shortcut",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

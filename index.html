@@ -23,6 +23,13 @@
 <meta name="twitter:image" content="./og-image.svg">
 
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<link rel="manifest" href="./manifest.json">
+<meta name="application-name" content="SUNNY EDITOR">
+<meta name="apple-mobile-web-app-title" content="SUNNY EDITOR">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4662,6 +4669,31 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initI18n);
 } else {
   initI18n();
+}
+
+// ════════════════════════════════════
+//  Service Worker 등록 (PWA — 오프라인 캐싱)
+//   - HTTPS·localhost에서만 등록 (file:// 에선 skip)
+//   - 자동 갱신: 새 버전 감지 시 즉시 활성화
+// ════════════════════════════════════
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        // 업데이트 발견 시 = 즉시 활성화 (= 사용자 새로고침 X)
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              // 새 버전 있음 = 자동 활성화 시도
+              nw.postMessage && nw.postMessage('skipWaiting');
+            }
+          });
+        });
+      })
+      .catch(err => console.debug('SW register failed:', err));
+  });
 }
 </script>
 <!-- 푸터 -->
