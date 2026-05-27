@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#FAFAFA"/>
+  <rect x="60" y="60" width="60" height="60" fill="oklch(0.45 0.12 240)"/>
+  <text x="92" y="103" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-weight="600" font-size="26" fill="#FFFFFF" letter-spacing="-1">SE</text>
+  <text x="138" y="98" font-family="'JetBrains Mono', ui-monospace, monospace" font-weight="600" font-size="22" fill="#0A0A0E" letter-spacing="1">SUNNY EDITOR</text>
+  <text x="138" y="124" font-family="-apple-system, sans-serif" font-size="13" fill="rgba(10,10,14,0.55)">Edit a finished HTML page — no code · sunnyeditor.com</text>
+
+  <text x="60" y="290" font-family="'Pretendard Variable', sans-serif" font-weight="700" font-size="68" fill="#0A0A0E" letter-spacing="-2">완성된 HTML 페이지의</text>
+  <text x="60" y="370" font-family="'Pretendard Variable', sans-serif" font-weight="700" font-size="68" fill="#0A0A0E" letter-spacing="-2">이미지·텍스트를 한 번에.</text>
+
+  <text x="60" y="450" font-family="-apple-system, sans-serif" font-size="22" fill="rgba(10,10,14,0.55)">Free · No install · No signup · 무료 · 회원가입 X</text>
+
+  <rect x="60" y="510" width="220" height="50" fill="oklch(0.45 0.12 240)"/>
+  <text x="170" y="542" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="500" font-size="16" fill="#FFFFFF">sunnyeditor.com</text>
+
+  <text x="1140" y="600" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="rgba(10,10,14,0.35)">SUNNY ENTERTAINMENT INC.</text>
+</svg>

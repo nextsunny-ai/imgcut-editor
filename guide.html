@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사용 가이드 — 써니에디터 / SUNNY EDITOR</title>
+<meta name="description" content="써니에디터 사용법. 단일 HTML / ZIP / 폴더 3가지 모드. 외부 CSS·이미지·다중 페이지 모두 지원. 무료.">
+<meta property="og:title" content="써니에디터 사용 가이드">
+<meta property="og:description" content="단일 HTML / ZIP / 폴더 3가지 모드. 외부 CSS·이미지 분리된 일반 웹사이트도 코드 없이 편집.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="./og-image.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface2: #F4F4F6;
+  --hairline: rgba(10, 10, 14, 0.08);
+  --hairline-strong: rgba(10, 10, 14, 0.16);
+  --accent: oklch(0.45 0.12 240);
+  --accent-soft: oklch(0.96 0.02 240);
+  --text: #0A0A0E;
+  --text2: rgba(10, 10, 14, 0.55);
+  --text3: rgba(10, 10, 14, 0.35);
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, SFMono-Regular, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: var(--font-mono); background: var(--surface2); padding: 1px 6px; font-size: 0.9em; }
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  padding: 14px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 10;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 28px; height: 28px;
+  background: var(--accent); color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+}
+.brand-text {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+}
+.nav-right { display: flex; gap: 14px; align-items: center; }
+.nav-links { display: flex; gap: 18px; font-size: 13px; }
+.nav-links a { color: var(--text2); }
+.nav-links a:hover { color: var(--text); }
+.nav-links a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+.lang-toggle {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em;
+}
+.lang-btn {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; padding: 4px 6px; font: inherit; letter-spacing: inherit;
+}
+.lang-btn:hover { color: var(--text); }
+.lang-btn.active { color: var(--accent); font-weight: 600; }
+.lang-sep { color: var(--text3); }
+
+main { max-width: 760px; margin: 0 auto; padding: 48px 32px 80px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 8px;
+}
+h1 {
+  font-size: 36px; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 14px;
+}
+.lede { font-size: 16px; color: var(--text2); margin-bottom: 40px; }
+
+h2 {
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 48px; margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+h3 {
+  font-size: 15px; font-weight: 600;
+  margin-top: 24px; margin-bottom: 8px;
+}
+p { margin-bottom: 14px; color: var(--text); }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { margin-bottom: 6px; }
+
+.mode-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px; margin: 20px 0;
+}
+.mode-card {
+  background: var(--surface); border: 1px solid var(--hairline);
+  padding: 16px;
+}
+.mode-card h3 {
+  margin-top: 0; font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: 0.04em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 8px;
+}
+.mode-card p {
+  font-size: 12px; color: var(--text2); line-height: 1.6; margin: 0;
+}
+
+.callout {
+  background: var(--surface); border-left: 2px solid var(--accent);
+  padding: 14px 18px; margin: 20px 0;
+}
+.callout strong {
+  color: var(--accent); display: block; margin-bottom: 4px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.callout p:last-child { margin-bottom: 0; }
+
+.faq dt { font-weight: 600; margin-top: 14px; font-size: 14px; }
+.faq dd { color: var(--text2); font-size: 14px; }
+
+.cta-row {
+  display: flex; gap: 10px; margin: 28px 0; flex-wrap: wrap;
+}
+.cta {
+  display: inline-block;
+  background: var(--accent); color: #fff;
+  padding: 9px 18px;
+  font-size: 13px; font-weight: 500; letter-spacing: -0.01em;
+}
+.cta.secondary {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--hairline);
+}
+.cta:hover { text-decoration: none; opacity: 0.9; }
+
+footer {
+  border-top: 1px solid var(--hairline);
+  padding: 24px 32px; margin-top: 60px;
+  text-align: center;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text3);
+}
+
+@media (max-width: 720px) {
+  main { padding: 32px 20px; }
+  h1 { font-size: 28px; }
+  .mode-grid { grid-template-columns: 1fr; }
+  .site-header { padding: 12px 18px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <div class="brand-mark">SE</div>
+    <div class="brand-text">SUNNY EDITOR</div>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="lang-btn" data-lang="ko" onclick="setLang('ko')">KO</button>
+      <span class="lang-sep">/</span>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+    <nav class="nav-links">
+      <a href="./index.html" data-i18n="nav.editor">에디터 열기</a>
+      <a href="./guide.html" aria-current="page" data-i18n="nav.guide">가이드</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="eyebrow" data-i18n="g.eyebrow">USER GUIDE</div>
+  <h1 data-i18n="g.title">써니에디터 사용 가이드</h1>
+  <p class="lede" data-i18n="g.lede">완성된 HTML 페이지의 이미지와 텍스트를 코드 한 줄 건드리지 않고 한 번에 편집합니다. 설치 없음, 회원가입 없음, 서버 없음.</p>
+
+  <div class="cta-row">
+    <a class="cta" href="./index.html" data-i18n="g.cta.open">에디터 열기</a>
+    <a class="cta secondary" href="./samples/bakery/index.html" target="_blank" data-i18n="g.cta.sample1">샘플 1 (단일 페이지)</a>
+    <a class="cta secondary" href="./samples/portfolio/index.html" target="_blank" data-i18n="g.cta.sample2">샘플 2 (3-페이지)</a>
+  </div>
+
+  <h2 data-i18n="g.h.modes">3가지 모드 — 어떤 걸 쓰나요?</h2>
+  <div class="mode-grid">
+    <div class="mode-card">
+      <h3 data-i18n="g.mode.html.t">HTML</h3>
+      <p data-i18n="g.mode.html.d">HTML 파일 1개. 모든 CSS·이미지가 그 파일 안에 인라인되어 있는 경우. 가장 단순.</p>
+    </div>
+    <div class="mode-card">
+      <h3 data-i18n="g.mode.zip.t">ZIP</h3>
+      <p data-i18n="g.mode.zip.d">사이트 폴더를 ZIP으로 묶어서 업로드. 외부 CSS·이미지·여러 HTML 페이지 모두 지원.</p>
+    </div>
+    <div class="mode-card">
+      <h3 data-i18n="g.mode.folder.t">폴더</h3>
+      <p data-i18n="g.mode.folder.d">폴더를 통째로 선택 (Chrome / Edge). ZIP과 동일하지만 압축 단계 생략.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong data-i18n="g.tip.h">TIP</strong>
+    <p data-i18n-html="g.tip.b">어떤 모드인지 모르겠다면 <b>ZIP</b>으로 가세요. 가장 안전하고 어떤 사이트든 처리합니다.</p>
+  </div>
+
+  <h2 data-i18n="g.h.steps">사용법 4단계</h2>
+  <ol id="g-steps-list">
+    <li data-i18n-html="g.step.1"><b>모드 선택</b> — 좌측 사이드바 상단의 [HTML / ZIP / 폴더] 탭에서 모드 선택.</li>
+    <li data-i18n-html="g.step.2"><b>파일/폴더 업로드</b> — 드래그 앤 드롭 또는 클릭. ZIP/폴더는 자동으로 메인 HTML을 찾아 열어줍니다.</li>
+    <li data-i18n-html="g.step.3"><b>편집</b> — 상단 탭에서 [이미지] / [텍스트] / [미리보기] 전환. 카드 단위로 교체·수정·삭제.</li>
+    <li data-i18n-html="g.step.4"><b>다운로드</b> — HTML 모드는 단일 HTML, ZIP/폴더 모드는 ZIP으로 다시 묶여 저장됩니다.</li>
+  </ol>
+
+  <h2 data-i18n="g.h.multi">다중 HTML 페이지가 있을 때</h2>
+  <p data-i18n-html="g.multi.1">ZIP/폴더 안에 <code>index.html</code>, <code>about.html</code>, <code>contact.html</code> 처럼 여러 페이지가 있으면 사이드바에 <b>페이지 선택</b> 드롭다운이 나타납니다. 페이지를 바꿔서 각각 편집한 뒤, 다운로드하면 모든 페이지가 묶인 ZIP이 출력됩니다.</p>
+  <p data-i18n="g.multi.2">주의: 페이지를 바꾸기 전에 변경 사항이 사라진다는 경고가 나오면, 일단 다운로드한 뒤 다음 페이지로 넘어가세요.</p>
+
+  <h2 data-i18n="g.h.can">가능한 것 / 불가능한 것</h2>
+  <h3 data-i18n="g.can.t">가능</h3>
+  <ul id="g-can">
+    <li data-i18n-html="g.can.1">HTML 안의 모든 <code>&lt;img&gt;</code> 자동 감지·교체·크롭·삭제·크기 조정</li>
+    <li data-i18n="g.can.2">모든 제목·문단·버튼·리스트 텍스트 인라인 편집</li>
+    <li data-i18n-html="g.can.3">외부 CSS 파일 (<code>&lt;link rel="stylesheet"&gt;</code>) 자동 인라인 후 다시 분리하여 출력</li>
+    <li data-i18n-html="g.can.4">상대경로 이미지 (<code>./images/logo.png</code> 등) 실제 표시·교체</li>
+    <li data-i18n="g.can.5">여러 HTML 페이지 동시 보관 + 페이지 전환 편집</li>
+    <li data-i18n="g.can.6">팝업 배너 / 쿠키 동의 1클릭 삽입</li>
+    <li data-i18n="g.can.7">변경/삭제/교체 모두 개별 취소 가능</li>
+    <li data-i18n="g.can.8">한국어 / 영어 UI 자동 전환</li>
+  </ul>
+  <h3 data-i18n="g.cant.t">불가능</h3>
+  <ul id="g-cant">
+    <li data-i18n-html="g.cant.1">React/Vue/Svelte 컴포넌트 소스코드 자체 (.jsx, .vue). 다만 <b>빌드 후 결과물</b>(정적 HTML)은 처리 가능.</li>
+    <li data-i18n="g.cant.2">서버에서 동적으로 생성되는 페이지의 템플릿 자체. 받은 정적 HTML만 편집됨.</li>
+    <li data-i18n="g.cant.3">JS로 런타임에 생성되는 콘텐츠는 정적 HTML에 없으면 감지 안 됨.</li>
+  </ul>
+
+  <h2 class="faq" data-i18n="g.h.faq">자주 묻는 질문</h2>
+  <dl class="faq" id="g-faq">
+    <dt data-i18n="g.faq.q1">업로드한 파일이 서버로 전송되나요?</dt>
+    <dd data-i18n="g.faq.a1">아니요. 모든 처리는 브라우저 안에서만 일어납니다. 파일·이미지·텍스트는 외부로 전송되지 않습니다.</dd>
+
+    <dt data-i18n="g.faq.q2">인터넷 없이 쓸 수 있나요?</dt>
+    <dd data-i18n-html="g.faq.a2">네. <code>index.html</code> 파일을 다운로드해서 더블클릭하면 오프라인에서도 작동합니다. 첫 폰트 로딩만 인터넷이 필요합니다.</dd>
+
+    <dt data-i18n="g.faq.q3">편집한 결과가 원본을 망가뜨리나요?</dt>
+    <dd data-i18n-html="g.faq.a3">원본 파일은 그대로 보존됩니다. 다운로드된 결과물은 <code>이름_edited.html</code> 또는 <code>이름_edited.zip</code>으로 별도 저장됩니다.</dd>
+
+    <dt data-i18n="g.faq.q4">모바일에서도 되나요?</dt>
+    <dd data-i18n="g.faq.a4">기본 기능은 됩니다. 다만 작업 효율을 위해 데스크탑 브라우저(Chrome, Edge, Safari) 권장.</dd>
+
+    <dt data-i18n="g.faq.q5">가격은요?</dt>
+    <dd data-i18n="g.faq.a5">무료입니다. 향후 사이트에 광고가 1개 표시될 수 있습니다(편집 영역은 X).</dd>
+  </dl>
+
+  <h2 data-i18n="g.h.browser">지원 브라우저</h2>
+  <ul id="g-browser">
+    <li data-i18n="g.br.1">Chrome (권장)</li>
+    <li data-i18n="g.br.2">Microsoft Edge (권장)</li>
+    <li data-i18n="g.br.3">Safari — 단일 HTML, ZIP 모드 OK. 폴더 모드는 webkitdirectory 지원 안 함.</li>
+    <li data-i18n="g.br.4">Firefox — 폴더 모드 일부 제한.</li>
+  </ul>
+
+  <div class="cta-row">
+    <a class="cta" href="./index.html" data-i18n="g.cta.open">에디터 열기</a>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 SUNNY ENTERTAINMENT INC. All rights reserved.
+</footer>
+
+<script>
+const G_I18N = {
+  ko: {
+    'nav.editor': '에디터 열기',
+    'nav.guide': '가이드',
+    'g.eyebrow': 'USER GUIDE',
+    'g.title': '써니에디터 사용 가이드',
+    'g.lede': '완성된 HTML 페이지의 이미지와 텍스트를 코드 한 줄 건드리지 않고 한 번에 편집합니다. 설치 없음, 회원가입 없음, 서버 없음.',
+    'g.cta.open': '에디터 열기',
+    'g.cta.sample1': '샘플 1 (단일 페이지)',
+    'g.cta.sample2': '샘플 2 (3-페이지)',
+    'g.h.modes': '3가지 모드 — 어떤 걸 쓰나요?',
+    'g.mode.html.t': 'HTML',
+    'g.mode.html.d': 'HTML 파일 1개. 모든 CSS·이미지가 그 파일 안에 인라인되어 있는 경우. 가장 단순.',
+    'g.mode.zip.t': 'ZIP',
+    'g.mode.zip.d': '사이트 폴더를 ZIP으로 묶어서 업로드. 외부 CSS·이미지·여러 HTML 페이지 모두 지원.',
+    'g.mode.folder.t': '폴더',
+    'g.mode.folder.d': '폴더를 통째로 선택 (Chrome / Edge). ZIP과 동일하지만 압축 단계 생략.',
+    'g.tip.h': 'TIP',
+    'g.tip.b': '어떤 모드인지 모르겠다면 <b>ZIP</b>으로 가세요. 가장 안전하고 어떤 사이트든 처리합니다.',
+    'g.h.steps': '사용법 4단계',
+    'g.step.1': '<b>모드 선택</b> — 좌측 사이드바 상단의 [HTML / ZIP / 폴더] 탭에서 모드 선택.',
+    'g.step.2': '<b>파일/폴더 업로드</b> — 드래그 앤 드롭 또는 클릭. ZIP/폴더는 자동으로 메인 HTML을 찾아 열어줍니다.',
+    'g.step.3': '<b>편집</b> — 상단 탭에서 [이미지] / [텍스트] / [미리보기] 전환. 카드 단위로 교체·수정·삭제.',
+    'g.step.4': '<b>다운로드</b> — HTML 모드는 단일 HTML, ZIP/폴더 모드는 ZIP으로 다시 묶여 저장됩니다.',
+    'g.h.multi': '다중 HTML 페이지가 있을 때',
+    'g.multi.1': 'ZIP/폴더 안에 <code>index.html</code>, <code>about.html</code>, <code>contact.html</code> 처럼 여러 페이지가 있으면 사이드바에 <b>페이지 선택</b> 드롭다운이 나타납니다. 페이지를 바꿔서 각각 편집한 뒤, 다운로드하면 모든 페이지가 묶인 ZIP이 출력됩니다.',
+    'g.multi.2': '주의: 페이지를 바꾸기 전에 변경 사항이 사라진다는 경고가 나오면, 일단 다운로드한 뒤 다음 페이지로 넘어가세요.',
+    'g.h.can': '가능한 것 / 불가능한 것',
+    'g.can.t': '가능',
+    'g.can.1': 'HTML 안의 모든 <code>&lt;img&gt;</code> 자동 감지·교체·크롭·삭제·크기 조정',
+    'g.can.2': '모든 제목·문단·버튼·리스트 텍스트 인라인 편집',
+    'g.can.3': '외부 CSS 파일 (<code>&lt;link rel="stylesheet"&gt;</code>) 자동 인라인 후 다시 분리하여 출력',
+    'g.can.4': '상대경로 이미지 (<code>./images/logo.png</code> 등) 실제 표시·교체',
+    'g.can.5': '여러 HTML 페이지 동시 보관 + 페이지 전환 편집',
+    'g.can.6': '팝업 배너 / 쿠키 동의 1클릭 삽입',
+    'g.can.7': '변경/삭제/교체 모두 개별 취소 가능',
+    'g.can.8': '한국어 / 영어 UI 자동 전환',
+    'g.cant.t': '불가능',
+    'g.cant.1': 'React/Vue/Svelte 컴포넌트 소스코드 자체 (.jsx, .vue). 다만 <b>빌드 후 결과물</b>(정적 HTML)은 처리 가능.',
+    'g.cant.2': '서버에서 동적으로 생성되는 페이지의 템플릿 자체. 받은 정적 HTML만 편집됨.',
+    'g.cant.3': 'JS로 런타임에 생성되는 콘텐츠는 정적 HTML에 없으면 감지 안 됨.',
+    'g.h.faq': '자주 묻는 질문',
+    'g.faq.q1': '업로드한 파일이 서버로 전송되나요?',
+    'g.faq.a1': '아니요. 모든 처리는 브라우저 안에서만 일어납니다. 파일·이미지·텍스트는 외부로 전송되지 않습니다.',
+    'g.faq.q2': '인터넷 없이 쓸 수 있나요?',
+    'g.faq.a2': '네. <code>index.html</code> 파일을 다운로드해서 더블클릭하면 오프라인에서도 작동합니다. 첫 폰트 로딩만 인터넷이 필요합니다.',
+    'g.faq.q3': '편집한 결과가 원본을 망가뜨리나요?',
+    'g.faq.a3': '원본 파일은 그대로 보존됩니다. 다운로드된 결과물은 <code>이름_edited.html</code> 또는 <code>이름_edited.zip</code>으로 별도 저장됩니다.',
+    'g.faq.q4': '모바일에서도 되나요?',
+    'g.faq.a4': '기본 기능은 됩니다. 다만 작업 효율을 위해 데스크탑 브라우저(Chrome, Edge, Safari) 권장.',
+    'g.faq.q5': '가격은요?',
+    'g.faq.a5': '무료입니다. 향후 사이트에 광고가 1개 표시될 수 있습니다(편집 영역은 X).',
+    'g.h.browser': '지원 브라우저',
+    'g.br.1': 'Chrome (권장)',
+    'g.br.2': 'Microsoft Edge (권장)',
+    'g.br.3': 'Safari — 단일 HTML, ZIP 모드 OK. 폴더 모드는 webkitdirectory 지원 안 함.',
+    'g.br.4': 'Firefox — 폴더 모드 일부 제한.',
+  },
+  en: {
+    'nav.editor': 'Open editor',
+    'nav.guide': 'Guide',
+    'g.eyebrow': 'USER GUIDE',
+    'g.title': 'SUNNY EDITOR — User guide',
+    'g.lede': 'Edit images and text in a finished HTML page — no code. No install, no signup, no server.',
+    'g.cta.open': 'Open editor',
+    'g.cta.sample1': 'Sample 1 (single page)',
+    'g.cta.sample2': 'Sample 2 (3-page)',
+    'g.h.modes': 'Three modes — which one?',
+    'g.mode.html.t': 'HTML',
+    'g.mode.html.d': 'Single HTML file with all CSS and images inlined. Simplest.',
+    'g.mode.zip.t': 'ZIP',
+    'g.mode.zip.d': 'Whole site folder zipped. Supports external CSS, images, and multiple HTML pages.',
+    'g.mode.folder.t': 'Folder',
+    'g.mode.folder.d': 'Pick a folder (Chrome / Edge). Same as ZIP but no zipping step.',
+    'g.tip.h': 'TIP',
+    'g.tip.b': 'If unsure, go with <b>ZIP</b>. Safest and handles any site.',
+    'g.h.steps': 'Usage in 4 steps',
+    'g.step.1': '<b>Pick mode</b> — top of the left sidebar [HTML / ZIP / Folder] tabs.',
+    'g.step.2': '<b>Upload</b> — drag and drop or click. ZIP/folder auto-detect the main HTML.',
+    'g.step.3': '<b>Edit</b> — top tabs [Images] / [Text] / [Preview]. Card-by-card replace, edit, delete.',
+    'g.step.4': '<b>Download</b> — HTML mode = single HTML. ZIP/folder mode = repackaged ZIP.',
+    'g.h.multi': 'When there are multiple HTML pages',
+    'g.multi.1': 'If your ZIP/folder has <code>index.html</code>, <code>about.html</code>, <code>contact.html</code> etc., a <b>Page</b> dropdown appears in the sidebar. Switch pages to edit each, and the downloaded ZIP includes all pages.',
+    'g.multi.2': 'If a warning says your edits will be lost when switching pages, download first and then move to the next page.',
+    'g.h.can': 'What works / What does not',
+    'g.can.t': 'Works',
+    'g.can.1': 'Auto-detect every <code>&lt;img&gt;</code> in the HTML — replace, crop, delete, resize',
+    'g.can.2': 'Inline edit every heading, paragraph, button, and list',
+    'g.can.3': 'External CSS files (<code>&lt;link rel="stylesheet"&gt;</code>) auto-inlined and then re-split on download',
+    'g.can.4': 'Relative-path images (<code>./images/logo.png</code> etc.) actually display and can be replaced',
+    'g.can.5': 'Multiple HTML pages held in memory + per-page switching',
+    'g.can.6': 'One-click popup banner / cookie consent',
+    'g.can.7': 'Change/delete/replace all individually undoable',
+    'g.can.8': 'Korean / English UI auto-switch',
+    'g.cant.t': 'Does not work',
+    'g.cant.1': 'React/Vue/Svelte component source files (.jsx, .vue). But the <b>built output</b> (static HTML) does work.',
+    'g.cant.2': 'Server-side template sources themselves. Only the received static HTML is editable.',
+    'g.cant.3': 'Content created at runtime by JS — if it is not in the static HTML, it is not detected.',
+    'g.h.faq': 'FAQ',
+    'g.faq.q1': 'Are uploaded files sent to a server?',
+    'g.faq.a1': 'No. Everything runs in your browser. Files, images, and text are never transmitted.',
+    'g.faq.q2': 'Does it work offline?',
+    'g.faq.a2': 'Yes. Download <code>index.html</code> and double-click it. Works offline (the first font load needs internet).',
+    'g.faq.q3': 'Does editing damage the original?',
+    'g.faq.a3': 'Originals are preserved. The download is saved separately as <code>name_edited.html</code> or <code>name_edited.zip</code>.',
+    'g.faq.q4': 'Does it work on mobile?',
+    'g.faq.a4': 'Basic features yes, but a desktop browser (Chrome, Edge, Safari) is recommended for productivity.',
+    'g.faq.q5': 'Price?',
+    'g.faq.a5': 'Free. The site may show one ad in the future (never in the editing area).',
+    'g.h.browser': 'Supported browsers',
+    'g.br.1': 'Chrome (recommended)',
+    'g.br.2': 'Microsoft Edge (recommended)',
+    'g.br.3': 'Safari — HTML and ZIP modes work. Folder mode (webkitdirectory) not supported.',
+    'g.br.4': 'Firefox — Folder mode partially limited.',
+  }
+};
+let gLang = 'ko';
+function gT(k) { return G_I18N[gLang]?.[k] || G_I18N.ko?.[k] || k; }
+function gDetect() {
+  try { const s = localStorage.getItem('swe.lang'); if (s==='ko'||s==='en') return s; } catch(e){}
+  return (navigator.language||'').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+}
+function gApply() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = gT(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = gT(el.dataset.i18nHtml); });
+}
+function setLang(lang) {
+  if (lang!=='ko'&&lang!=='en') return;
+  gLang = lang;
+  try { localStorage.setItem('swe.lang', lang); } catch(e){}
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  gApply();
+  document.title = lang==='en' ? 'User guide — SUNNY EDITOR' : '사용 가이드 — 써니에디터 / SUNNY EDITOR';
+}
+(function init(){
+  gLang = gDetect();
+  document.documentElement.lang = gLang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === gLang));
+  gApply();
+  if (gLang==='en') document.title = 'User guide — SUNNY EDITOR';
+})();
+</script>
+
+</body>
+</html>

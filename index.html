@@ -3,1030 +3,1235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML 이미지 편집기</title>
+<title>써니에디터 | SUNNY EDITOR</title>
+<meta name="description" content="완성된 HTML 페이지의 이미지·텍스트를 코드 없이 한 번에 편집. 단일 HTML / ZIP / 폴더 모두 지원. 외부 CSS·이미지·다중 페이지 OK. 설치·회원가입·서버 불필요. 무료.">
+<meta name="keywords" content="써니에디터, sunny editor, 웹에디터, web editor, HTML editor, HTML 편집기, 랜딩페이지 수정, landing page editor, no-code HTML editor, 이미지 교체, image replacer, ZIP editor">
+<meta name="author" content="SUNNY ENTERTAINMENT INC.">
+<meta name="theme-color" content="#FAFAFA">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="써니에디터 | SUNNY EDITOR">
+<meta property="og:description" content="Edit images and text in a finished HTML page — no code. HTML · ZIP · Folder. Free, no signup. 무료 · 회원가입 X.">
+<meta property="og:image" content="./og-image.svg">
+<meta property="og:locale" content="ko_KR">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="써니에디터 | SUNNY EDITOR">
+<meta name="twitter:description" content="Edit images and text in a finished HTML page — no code.">
+<meta name="twitter:image" content="./og-image.svg">
+
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
+/* ============================================================
+   써니에디터 — Mono + Blue Accent
+   배경 #FAFAFA · 텍스트 #0A0A0E · 액센트 oklch(0.45 0.12 240)
+   Pretendard + JetBrains Mono · hairline · 직각 카드
+   ============================================================ */
 :root {
-  --bg: #0f0e17;
-  --surface: #1a1826;
-  --surface2: #241f35;
-  --border: #2e2847;
-  --accent: #ff6b6b;
-  --accent2: #ffd93d;
-  --accent3: #6bcb77;
-  --accent4: #4d96ff;
-  --text: #fffffe;
-  --text2: #a79fc4;
-  --radius: 16px;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface2: #F4F4F6;
+  --hairline: rgba(10, 10, 14, 0.08);
+  --hairline-strong: rgba(10, 10, 14, 0.16);
+  --accent: oklch(0.45 0.12 240);
+  --accent-soft: oklch(0.96 0.02 240);
+  --accent-hover: oklch(0.40 0.13 240);
+  --text: #0A0A0E;
+  --text2: rgba(10, 10, 14, 0.55);
+  --text3: rgba(10, 10, 14, 0.35);
+  --danger: #B22D2D;
+  --success: #1F7A4D;
+  --warn: #7A5A1F;
+  --radius: 2px;
+  --radius-input: 4px;
+  --shadow-sm: 0 1px 2px rgba(10,10,14,0.04);
+  --shadow-md: 0 4px 16px rgba(10,10,14,0.06);
+  --shadow-modal: 0 24px 64px rgba(10,10,14,0.12);
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* JetBrains Mono = 영문/숫자만. 한글은 Pretendard로 자동 폴백 → 시스템 폰트 안 보임 */
+  --font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, SFMono-Regular, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body { background: var(--bg); }
 body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg);
+  font-family: var(--font-sans);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+button, input, select, textarea { font-family: inherit; color: inherit; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
 /* ── 헤더 ── */
 .header {
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  height: 60px;
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 24px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(12px);
 }
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.logo { display: flex; align-items: center; gap: 10px; }
 .logo-mark {
-  width: 32px;
-  height: 32px;
+  width: 28px; height: 28px;
   background: var(--accent);
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
+  color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.02em;
 }
 .logo-text {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  letter-spacing: .06em;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text);
 }
 .logo-sub {
   font-size: 11px;
   color: var(--text2);
-  margin-top: -2px;
+  margin-top: 1px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
 }
-.header-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+.header-actions { display: flex; gap: 6px; align-items: center; }
 
 /* ── 버튼 ── */
 .btn {
-  border: none;
-  border-radius: 10px;
-  padding: 9px 18px;
-  font-size: 13px;
-  font-weight: 700;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all .15s;
-  font-family: inherit;
+  transition: background .12s, border-color .12s, color .12s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
-.btn-ghost:hover:not(:disabled) { background: var(--border); color: var(--text); }
-.btn-red { background: var(--accent); color: #fff; }
-.btn-red:hover:not(:disabled) { background: #ff4f4f; }
-.btn-yellow { background: var(--accent2); color: #1a1a1a; }
-.btn-yellow:hover:not(:disabled) { background: #ffc800; }
-.btn-green { background: var(--accent3); color: #1a1a1a; }
-.btn-green:hover:not(:disabled) { background: #55b862; }
-.btn-teal { background: #0f9e78; color: #fff; }
-.btn-teal:hover:not(:disabled) { background: #0bb889; }
-.btn-purple { background: #7b5ea7; color: #fff; }
-.btn-purple:hover:not(:disabled) { background: #9070c0; }
-
-/* 요소 추가 모달 */
-.ae-tab {
-  border: none; background: var(--surface2); color: var(--text2);
-  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
-  cursor: pointer; font-family: inherit; transition: all .15s;
+.btn:hover:not(:disabled) { background: var(--surface2); border-color: var(--hairline-strong); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn-ghost { background: transparent; }
+.btn-primary, .btn-red, .btn-green, .btn-yellow, .btn-blue, .btn-teal, .btn-purple {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
-.ae-tab.active { background: #0f9e78; color: #fff; }
-.ae-tab:hover:not(.active) { background: var(--border); color: var(--text); }
-.ae-field-group { margin-bottom: 12px; }
-.ae-label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 5px; letter-spacing: .05em; }
-.ae-input {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text);
-  font-family: inherit; resize: vertical;
+.btn-primary:hover:not(:disabled),
+.btn-red:hover:not(:disabled),
+.btn-green:hover:not(:disabled),
+.btn-yellow:hover:not(:disabled),
+.btn-blue:hover:not(:disabled),
+.btn-teal:hover:not(:disabled),
+.btn-purple:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
-.ae-input:focus { outline: none; border-color: #0f9e78; }
-.ae-color { width: 100%; height: 36px; border: 1px solid var(--border); border-radius: 8px; padding: 2px; cursor: pointer; background: var(--surface2); }
-.ae-check-row { margin-bottom: 8px; font-size: 13px; color: var(--text2); }
-.ae-check-row input { margin-right: 6px; cursor: pointer; }
-.btn-blue { background: var(--accent4); color: #fff; }
-.btn-blue:hover:not(:disabled) { background: #3a7de0; }
-.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
-.btn-icon { padding: 8px; border-radius: 8px; }
+.btn-sm { padding: 6px 10px; font-size: 11px; }
+.btn-icon { padding: 7px; }
 
 /* ── 메인 레이아웃 ── */
-.main { display: flex; height: calc(100vh - 60px); }
+.main { display: flex; height: calc(100vh - 56px); }
 
 /* ── 사이드바 ── */
 .sidebar {
-  width: 300px;
-  flex-shrink: 0;
+  width: 280px;
   background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  border-right: 1px solid var(--hairline);
+  overflow-y: auto;
+  flex-shrink: 0;
 }
-.sidebar-section {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-}
+.sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--hairline); }
 .sidebar-label {
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  color: var(--text2);
+  font-weight: 600;
+  color: var(--text3);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
 }
 
-/* 파일 드롭존 */
+.upload-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-bottom: 10px;
+  border: 1px solid var(--hairline);
+}
+.um-tab {
+  border: none;
+  background: var(--surface);
+  color: var(--text2);
+  padding: 7px 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-right: 1px solid var(--hairline);
+}
+.um-tab:last-child { border-right: none; }
+.um-tab:hover { background: var(--surface2); color: var(--text); }
+.um-tab.active { background: var(--text); color: var(--surface); }
+
 .file-dropzone {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
-  padding: 28px 20px;
+  border: 1px dashed var(--hairline-strong);
+  background: var(--surface);
+  padding: 24px 16px;
   text-align: center;
   cursor: pointer;
-  transition: all .2s;
-  background: var(--surface2);
+  transition: background .12s, border-color .12s;
+  border-radius: var(--radius);
 }
 .file-dropzone:hover, .file-dropzone.drag-over {
+  background: var(--accent-soft);
   border-color: var(--accent);
-  background: rgba(255,107,107,.06);
 }
-.file-dropzone .dz-icon { font-size: 32px; margin-bottom: 8px; }
-.file-dropzone strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.file-dropzone .dz-icon { display: none; }
+.file-dropzone strong { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
 .file-dropzone span { font-size: 11px; color: var(--text2); }
 
-/* 파일 정보 */
-.file-info {
-  display: none;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-}
+.file-info { margin-top: 12px; display: none; }
 .file-info.show { display: block; }
 .file-info-name {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
   word-break: break-all;
-  color: var(--accent2);
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
 }
-.file-info-stats {
-  display: flex;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--text2);
-}
+.file-info-stats { display: flex; gap: 6px; flex-wrap: wrap; }
 .stat-chip {
-  background: var(--border);
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
-/* 통계 */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.stat-card {
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  text-align: center;
+  border: 1px solid var(--hairline);
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
-.stat-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  line-height: 1;
-  margin-bottom: 3px;
-}
-.stat-num.red { color: var(--accent); }
-.stat-num.green { color: var(--accent3); }
-.stat-num.yellow { color: var(--accent2); }
-.stat-num.blue { color: var(--accent4); }
-.stat-label { font-size: 11px; color: var(--text2); }
 
-/* 변경 목록 */
-.change-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); }
+.stat-card { padding: 12px; background: var(--surface); }
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
 }
+.stat-num.red, .stat-num.green, .stat-num.yellow, .stat-num.blue { color: var(--text); }
+.stat-card .stat-num:not(.is-zero) { color: var(--accent); }
+.stat-label { font-size: 10px; color: var(--text2); margin-top: 4px; letter-spacing: 0.02em; }
+
+.change-list { padding: 8px 0; max-height: 240px; overflow-y: auto; }
 .change-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 12px;
+  padding: 6px 20px;
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--font-mono);
 }
-.change-item .ci-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.change-item.del .ci-dot { background: var(--accent); }
-.change-item.rep .ci-dot { background: var(--accent3); }
+.change-item:hover { background: var(--surface2); }
+.change-item .ci-dot { width: 6px; height: 6px; background: var(--text3); flex-shrink: 0; }
+.change-item.del .ci-dot { background: var(--danger); }
+.change-item.rep .ci-dot { background: var(--accent); }
 .change-item .ci-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .change-item .ci-undo {
-  background: none;
-  border: none;
-  color: var(--text2);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px;
-  line-height: 1;
+  border: none; background: none; color: var(--text3);
+  cursor: pointer; font-size: 11px; padding: 0 4px;
 }
 .change-item .ci-undo:hover { color: var(--accent); }
 .change-empty {
+  padding: 16px 20px;
+  font-size: 11px;
+  color: var(--text3);
   text-align: center;
-  padding: 24px;
-  color: var(--text2);
-  font-size: 12px;
+  font-family: var(--font-mono);
 }
 
-/* ── 콘텐츠 영역 ── */
+/* ── 콘텐츠 ── */
 .content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--bg);
 }
 
-/* 툴바 */
 .tabbar {
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
   display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 24px;
 }
 .tab {
   border: none;
   background: none;
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 700;
-  font-family: inherit;
   padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all .15s;
-  white-space: nowrap;
+  margin-bottom: -1px;
+  letter-spacing: -0.01em;
 }
 .tab:hover { color: var(--text); }
-.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab.active { color: var(--text); border-bottom: 2px solid var(--accent); font-weight: 600; }
 .tab-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 
-/* 필터바 - 탭 아래 별도 줄 */
 .filterbar {
-  padding: 8px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-}
-.filter-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text2);
-  margin-right: 6px;
-}
-.filter-chips {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  padding: 10px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
   flex-wrap: wrap;
 }
-.filter-chip {
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text2);
-  transition: all .15s;
+.filter-label {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
+.filter-chips { display: flex; gap: 4px; align-items: center; }
+.filter-chip {
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.filter-chip:hover { color: var(--text); background: var(--surface2); }
 .filter-chip.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+  color: var(--text);
+  border-color: var(--hairline-strong);
+  background: var(--surface);
 }
 
-/* 미리보기 툴바 */
 .preview-toolbar {
-  padding: 10px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
+  padding: 10px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
 }
 
-/* 그리드 */
-.grid-wrap {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-}
+.grid-wrap { flex: 1; overflow-y: auto; padding: 24px; }
 .img-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-/* ── 텍스트 편집 리스트 ── */
-.txt-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 900px;
-  margin: 0 auto;
-  width: 100%;
-}
+.txt-list { display: flex; flex-direction: column; gap: 8px; max-width: 980px; }
 .txt-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color .15s;
+  border: 1px solid var(--hairline);
 }
-.txt-card:hover { border-color: var(--accent4); }
-.txt-card.txt-edited { border-color: var(--accent3); }
-.txt-card.txt-deleted { border-color: var(--accent); opacity: .5; }
+.txt-card:hover { border-color: var(--hairline-strong); }
+.txt-card.txt-edited { border-left: 2px solid var(--accent); }
+.txt-card.txt-deleted { opacity: .45; border-left: 2px solid var(--danger); }
+
 .txt-card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
   background: var(--surface2);
-  border-bottom: 1px solid var(--border);
 }
 .txt-type-badge {
   font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-.badge-h1, .badge-h2 { background: rgba(255,107,107,.18); color: var(--accent); }
-.badge-h3, .badge-h4 { background: rgba(255,217,61,.18); color: var(--accent2); }
-.badge-p  { background: rgba(77,150,255,.18); color: var(--accent4); }
-.badge-btn { background: rgba(107,203,119,.18); color: var(--accent3); }
-.badge-li { background: rgba(167,159,196,.18); color: var(--text2); }
-.txt-card-path {
-  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   color: var(--text2);
+}
+.badge-h1, .badge-h2, .badge-h3, .badge-h4 { color: var(--text); border-color: var(--hairline-strong); }
+.badge-p, .badge-btn, .badge-li { color: var(--text2); }
+.txt-card-path {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--font-mono);
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.txt-card-actions { display: flex; gap: 6px; margin-left: auto; }
+.txt-card-actions { display: flex; gap: 4px; margin-left: auto; }
 .txt-action {
-  border: none;
+  border: 1px solid var(--hairline);
   background: var(--surface);
-  border-radius: 7px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .15s;
   color: var(--text2);
+  padding: 4px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
-.txt-action:hover { background: var(--border); color: var(--text); }
-.txt-action.danger { color: var(--accent); }
-.txt-action.danger:hover { background: rgba(255,107,107,.15); }
-.txt-action.restore { color: var(--accent3); }
+.txt-action:hover { background: var(--surface2); color: var(--text); }
+.txt-action.danger { color: var(--danger); }
+.txt-action.restore { color: var(--success); }
 
 .txt-card-body { padding: 12px 14px; }
 .txt-original {
+  display: none;
+  padding: 10px 12px;
+  background: var(--surface2);
   font-size: 12px;
   color: var(--text2);
-  margin-bottom: 6px;
-  padding: 6px 10px;
-  background: var(--surface2);
-  border-radius: 6px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-all;
-  display: none;
+  margin-bottom: 8px;
+  border-left: 2px solid var(--hairline-strong);
 }
 .txt-original.show { display: block; }
 .txt-input {
   width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   color: var(--text);
+  padding: 10px 12px;
+  font-size: 13px;
   font-family: inherit;
+  line-height: 1.5;
   resize: vertical;
   min-height: 36px;
-  line-height: 1.6;
-  transition: border-color .15s;
 }
-.txt-input:focus { outline: none; border-color: var(--accent4); }
+.txt-input:focus { outline: none; border-color: var(--accent); }
 .txt-input.deleted-input { text-decoration: line-through; opacity: .5; pointer-events: none; }
 .txt-status {
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 5px;
-  min-height: 14px;
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 6px;
+  font-family: var(--font-mono);
 }
-.txt-status.edited { color: var(--accent3); }
-.txt-status.deleted { color: var(--accent); }
+.txt-status.edited { color: var(--accent); }
+.txt-status.deleted { color: var(--danger); }
 
-/* ── 이미지 크기 편집 ── */
+/* ── size edit ── */
 .size-edit-row { margin-top: 6px; }
 .size-toggle-btn {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 4px 10px;
-  font-size: 11px;
-  color: var(--text2);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .15s;
-  width: 100%;
-  text-align: left;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--surface); border: 1px solid var(--hairline);
+  padding: 4px 8px; font-size: 10px;
+  color: var(--text2); cursor: pointer;
+  font-family: var(--font-mono); letter-spacing: 0.02em;
 }
-.size-toggle-btn:hover { border-color: var(--accent4); color: var(--text); }
-.size-toggle-btn.active { border-color: var(--accent4); color: var(--accent4); background: rgba(77,150,255,.1); }
+.size-toggle-btn:hover { border-color: var(--hairline-strong); color: var(--text); }
+.size-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .size-edit-panel {
-  margin-top: 8px;
+  display: none;
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid var(--hairline);
   padding: 10px;
+  margin-top: 6px;
 }
-.size-edit-inputs { display: flex; gap: 8px; margin-bottom: 8px; }
-.size-field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.size-field label { font-size: 10px; color: var(--text2); font-weight: 700; }
+.size-edit-inputs { display: flex; gap: 6px; margin-bottom: 6px; }
+.size-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.size-field label {
+  font-size: 9px; color: var(--text3);
+  font-family: var(--font-mono); text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 .size-inp {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   padding: 5px 8px;
-  font-size: 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
   color: var(--text);
-  font-family: inherit;
-  width: 100%;
 }
-.size-inp:focus { outline: none; border-color: var(--accent4); }
-.size-presets { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+.size-inp:focus { outline: none; border-color: var(--accent); }
+.size-presets { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
 .size-preset {
-  background: var(--border);
-  border: none;
-  border-radius: 6px;
-  padding: 4px 8px;
+  padding: 3px 7px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   font-size: 10px;
-  color: var(--text2);
   cursor: pointer;
-  font-family: inherit;
-  transition: all .15s;
+  font-family: var(--font-mono);
+  color: var(--text2);
 }
-.size-preset:hover { background: var(--accent4); color: #fff; }
-.size-note { font-size: 10px; color: var(--accent3); min-height: 12px; }
+.size-preset:hover { border-color: var(--accent); color: var(--accent); }
+.size-note { font-size: 9px; color: var(--text3); font-family: var(--font-mono); min-height: 12px; }
 
 /* ── 이미지 카드 ── */
 .img-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
   overflow: hidden;
   cursor: pointer;
-  transition: all .2s;
+  transition: border-color .12s, transform .12s;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
-.img-card:hover { border-color: var(--accent4); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
-.img-card.selected { border-color: var(--accent4); box-shadow: 0 0 0 2px var(--accent4); }
-.img-card.deleted { border-color: var(--accent); opacity: .45; }
-.img-card.replaced { border-color: var(--accent3); }
+.img-card:hover { border-color: var(--hairline-strong); }
+.img-card.selected { border-color: var(--accent); }
+.img-card.deleted { opacity: .4; border-left: 2px solid var(--danger); }
+.img-card.replaced { border-left: 2px solid var(--accent); }
 
 .card-thumb {
   width: 100%;
-  aspect-ratio: 16/10;
-  object-fit: cover;
-  display: block;
+  aspect-ratio: 4 / 3;
   background: var(--surface2);
+  object-fit: contain;
+  display: block;
 }
 .card-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0);
+  background: rgba(10, 10, 14, 0.55);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
   opacity: 0;
-  transition: all .2s;
+  transition: opacity .12s;
 }
-.img-card:hover .card-overlay {
-  background: rgba(0,0,0,.55);
-  opacity: 1;
-}
-/* 크기 패널 열려있을 때 오버레이 완전히 숨김 */
-.img-card.size-open .card-overlay {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
+.img-card:hover .card-overlay { opacity: 1; }
+.img-card.size-open .card-overlay { opacity: 1; }
+
 .card-action {
-  border: none;
-  border-radius: 8px;
-  padding: 7px 13px;
-  font-size: 12px;
-  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
-  font-family: inherit;
+  letter-spacing: -0.01em;
 }
-.ca-replace { background: var(--accent3); color: #1a1a1a; }
-.ca-size    { background: #7b5ea7; color: #fff; }
-.ca-delete  { background: var(--accent); color: #fff; }
-.img-card.deleted .ca-delete { background: #555; }
+.card-action:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ca-replace, .ca-size, .ca-delete { background: var(--surface); color: var(--text); }
+.ca-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 
 .card-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
+  top: 6px; left: 6px;
   display: none;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 7px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
 }
-.badge-del { background: var(--accent); color: #fff; }
-.badge-rep { background: var(--accent3); color: #1a1a1a; }
+.badge-del { background: var(--danger); color: #fff; }
+.badge-rep { background: var(--accent); color: #fff; }
 .img-card.deleted .badge-del { display: block; }
 .img-card.replaced .badge-rep { display: block; }
 
 .card-num {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0,0,0,.6);
+  top: 6px; right: 6px;
+  background: rgba(10, 10, 14, 0.65);
   color: #fff;
-  padding: 3px 8px;
-  border-radius: 6px;
   font-size: 10px;
-  font-weight: 700;
-  font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: .04em;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
 }
 
-.card-info {
-  padding: 10px 12px 12px;
-}
+.card-info { padding: 8px 10px; border-top: 1px solid var(--hairline); }
 .card-name {
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 3px;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .card-meta {
   font-size: 10px;
-  color: var(--text2);
-  display: flex;
-  gap: 6px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  margin-top: 2px;
 }
 .card-status {
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 4px;
-  min-height: 14px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text2);
+  margin-top: 2px;
 }
-.img-card.deleted .card-status { color: var(--accent); }
-.img-card.replaced .card-status { color: var(--accent3); }
+.img-card.deleted .card-status { color: var(--danger); }
+.img-card.replaced .card-status { color: var(--accent); }
 
-/* ── 빈 상태 ── */
+/* ── 빈 화면 ── */
 .empty-screen {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 48px;
-  text-align: center;
+  gap: 28px;
+  padding: 48px 32px 64px;
+  background: var(--bg);
 }
-.empty-icon { font-size: 64px; opacity: .4; }
-.empty-screen h2 { font-size: 22px; font-weight: 900; opacity: .6; }
-.empty-screen p { font-size: 14px; color: var(--text2); max-width: 340px; line-height: 1.7; }
+.empty-icon { display: none; }
+.empty-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.empty-headline {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  text-align: center;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.empty-headline em {
+  font-style: normal;
+  color: var(--accent);
+}
+.empty-screen h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.empty-lede {
+  font-size: 14px;
+  color: var(--text2);
+  max-width: 460px;
+  text-align: center;
+  line-height: 1.7;
+  margin-top: -8px;
+}
+.empty-screen p {
+  font-size: 13px;
+  color: var(--text2);
+  max-width: 360px;
+  text-align: center;
+  line-height: 1.7;
+}
 
-/* ── 모달 공통 ── */
+/* ── 워크플로 다이어그램 (3단계) ── */
+.workflow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: var(--text);
+}
+.wf-step {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  padding: 16px 18px;
+  min-width: 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+.wf-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  position: absolute;
+  top: 10px;
+  right: 12px;
+}
+.wf-art {
+  width: 96px;
+  height: 64px;
+  color: var(--text2);
+}
+.wf-art svg { display: block; }
+.wf-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.wf-desc {
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.wf-arrow {
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+}
+
+/* ── 빈 화면 CTA ── */
+.empty-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+.btn-lg {
+  padding: 11px 22px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .workflow { gap: 6px; }
+  .wf-step { min-width: 132px; padding: 12px 14px; }
+  .wf-arrow { transform: rotate(90deg); }
+  .empty-headline { font-size: 28px; }
+}
+
+/* ── 모달 ── */
 .modal-bg {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.75);
-  z-index: 200;
+  background: rgba(10, 10, 14, 0.45);
+  z-index: 100;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(4px);
+  padding: 20px;
 }
 .modal-bg.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  box-shadow: var(--shadow-modal);
+  width: 520px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+.modal-close {
+  background: none; border: none;
+  color: var(--text2); font-size: 16px;
+  cursor: pointer; padding: 4px 8px;
+}
+.modal-close:hover { color: var(--text); }
 
-/* ── 교체/크롭 모달 ── */
+/* ── add element 모달 ── */
+.ae-tab {
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text2);
+  padding: 7px 14px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.ae-tab.active { background: var(--text); color: var(--surface); border-color: var(--text); }
+.ae-tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+.ae-field-group { margin-bottom: 12px; }
+.ae-label {
+  display: block; font-size: 10px; font-weight: 600;
+  color: var(--text2); margin-bottom: 5px;
+  font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.ae-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.ae-input:focus { outline: none; border-color: var(--accent); }
+.ae-color {
+  width: 100%; height: 32px;
+  border: 1px solid var(--hairline);
+  padding: 2px; cursor: pointer; background: var(--surface);
+}
+.ae-check-row { margin-bottom: 8px; font-size: 12px; color: var(--text2); }
+.ae-check-row input { margin-right: 6px; cursor: pointer; accent-color: var(--accent); }
+
+/* ── 크롭 모달 ── */
 .crop-modal {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  width: 860px;
-  max-width: 96vw;
-  max-height: 94vh;
+  border: 1px solid var(--hairline-strong);
+  box-shadow: var(--shadow-modal);
+  width: 920px;
+  max-width: 95vw;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0,0,0,.6);
 }
+/* 외곽 .modal-bg가 display:none → none으로 가려짐. .modal-bg.open → 같이 보임 */
 .crop-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; justify-content: space-between; align-items: center;
 }
-.crop-header h2 { font-size: 17px; font-weight: 900; }
-.crop-header p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.crop-header h2 { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+.crop-header p { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
 .crop-body {
   display: flex;
+  gap: 16px;
+  padding: 16px;
   flex: 1;
   overflow: hidden;
-  min-height: 0;
 }
-
-/* 업로드 존 */
 .upload-zone {
+  border: 1px dashed var(--hairline-strong);
+  background: var(--surface);
+  padding: 60px 32px;
+  text-align: center;
+  cursor: pointer;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding: 40px;
-  border-right: 1px solid var(--border);
-  cursor: pointer;
-  transition: background .2s;
-  min-height: 300px;
+  gap: 12px;
 }
 .upload-zone:hover, .upload-zone.drag-over {
-  background: rgba(255,107,107,.05);
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
-.upload-zone .uz-icon { font-size: 48px; opacity: .5; }
-.upload-zone strong { font-size: 15px; }
-.upload-zone span { font-size: 12px; color: var(--text2); }
+.upload-zone .uz-icon { display: none; }
+.upload-zone strong { font-size: 13px; font-weight: 500; }
+.upload-zone span { font-size: 11px; color: var(--text2); }
 
-/* 크롭 에디터 */
 .crop-editor {
   display: none;
   flex: 1;
-  flex-direction: column;
-  border-right: 1px solid var(--border);
+  flex-direction: row;
+  gap: 16px;
   overflow: hidden;
 }
 .crop-editor.show { display: flex; }
-
 .crop-canvas-wrap {
   flex: 1;
-  overflow: hidden;
-  position: relative;
-  background: #0a0a12;
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: crosshair;
+  position: relative;
+  overflow: hidden;
 }
 .crop-canvas { max-width: 100%; max-height: 100%; display: block; }
 .crop-overlay {
   position: absolute;
-  inset: 0;
   pointer-events: none;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(10,10,14,0.55);
 }
 
-/* 크롭 컨트롤 */
 .crop-controls {
-  padding: 14px 16px;
-  border-top: 1px solid var(--border);
+  width: 260px;
+  padding: 12px;
   background: var(--surface2);
+  border: 1px solid var(--hairline);
 }
-.crop-controls-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
+.crop-controls-row { margin-bottom: 12px; }
 .crop-controls-row:last-child { margin-bottom: 0; }
-.ctrl-label { font-size: 11px; color: var(--text2); font-weight: 700; width: 48px; flex-shrink: 0; }
-.ratio-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-.ratio-btn {
-  padding: 5px 10px;
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text2);
-  transition: all .15s;
-  font-family: inherit;
+.ctrl-label {
+  font-size: 10px; color: var(--text3);
+  font-weight: 600; width: 48px; flex-shrink: 0;
+  font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 6px; display: block;
 }
-.ratio-btn.active, .ratio-btn:hover { background: var(--accent4); color: #fff; border-color: var(--accent4); }
+.ratio-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+.ratio-btn {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text2);
+  padding: 5px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+.ratio-btn.active, .ratio-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-/* 미리보기 패널 */
 .preview-panel {
-  width: 200px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface2);
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
 }
 .preview-panel-title {
-  padding: 14px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text2);
-  border-bottom: 1px solid var(--border);
-  letter-spacing: .08em;
+  font-size: 10px;
+  color: var(--text3);
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  margin-bottom: 8px;
 }
-.preview-boxes {
-  flex: 1;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
+.preview-boxes { display: flex; gap: 8px; }
+.preview-box-item { flex: 1; }
+.preview-box-label {
+  font-size: 9px; color: var(--text3);
+  margin-bottom: 4px; font-family: var(--font-mono);
 }
-.preview-box-item {}
-.preview-box-label { font-size: 10px; color: var(--text2); margin-bottom: 6px; }
 .preview-thumb {
-  width: 100%;
-  aspect-ratio: 16/10;
+  width: 100%; aspect-ratio: 16/9;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
 }
 .preview-thumb-sq {
-  width: 100%;
-  aspect-ratio: 1;
+  width: 100%; aspect-ratio: 1/1;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
 }
 
 .crop-footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  border-top: 1px solid var(--hairline);
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  background: var(--surface2);
+  gap: 8px;
 }
 
 /* ── 공유 모달 ── */
 .share-modal {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  width: 400px;
-  max-width: 90vw;
-  box-shadow: 0 20px 50px rgba(0,0,0,.6);
-  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+  box-shadow: var(--shadow-modal);
+  width: 440px; max-width: 95vw;
 }
 .share-header {
-  padding: 18px 22px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hairline);
 }
-.share-header h2 { font-size: 15px; font-weight: 900; margin-bottom: 2px; }
-.share-header p { font-size: 11px; color: var(--text2); }
-.share-body { padding: 16px 20px; }
-.share-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.share-header h2 { font-size: 13px; font-weight: 600; }
+.share-header p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.share-body { padding: 14px 18px; }
+.share-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .share-opt {
-  background: var(--surface2);
-  border: 2px solid var(--border);
-  border-radius: 10px;
+  display: flex; align-items: center; gap: 10px;
   padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   cursor: pointer;
-  transition: all .15s;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  transition: border-color .12s;
 }
-.share-opt:hover { border-color: var(--accent4); }
-.share-opt.selected { border-color: var(--accent4); background: rgba(77,150,255,.08); }
-.share-opt-icon { font-size: 20px; }
+.share-opt:hover { border-color: var(--hairline-strong); }
+.share-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+.share-opt-icon { display: none; }
 .share-opt-info strong { display: block; font-size: 12px; margin-bottom: 1px; }
-.share-opt-info span { font-size: 10px; color: var(--text2); }
-
+.share-opt-info span { font-size: 11px; color: var(--text2); }
 .share-result { display: none; }
 .share-result.show { display: block; }
 .share-url-box {
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  font-family: monospace;
-  font-size: 12px;
+  border: 1px solid var(--hairline);
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   word-break: break-all;
-  color: var(--accent2);
-  margin-bottom: 12px;
-  line-height: 1.6;
+  margin-bottom: 8px;
 }
-.share-url-actions { display: flex; gap: 8px; }
-.share-note { font-size: 10px; color: var(--text2); line-height: 1.5; margin-top: 6px; }
+.share-url-actions { display: flex; gap: 6px; }
 
-.share-footer {
-  padding: 10px 20px;
-  border-top: 1px solid var(--border);
+/* ── 언어 토글 ── */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.lang-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 4px 6px;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.lang-btn:hover { color: var(--text); }
+.lang-btn.active { color: var(--accent); font-weight: 600; }
+.lang-sep { color: var(--text3); pointer-events: none; }
+
+/* ── 푸터 ── */
+.app-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+  padding: 12px 24px;
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.app-footer .copyright { color: var(--text2); }
+.app-footer .footer-meta { display: flex; gap: 14px; }
+
+/* ── 광고 슬롯 (출시 후 활성화) ── */
+.ad-slot {
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
 }
 
 /* ── 진행 오버레이 ── */
-.prog-overlay {
+.progress-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255, 255, 255, 0.92);
+  z-index: 200;
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(15,14,23,.92);
-  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.progress-overlay.show { display: flex; }
+.progress-box {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  padding: 28px 36px;
+  text-align: center;
+  min-width: 280px;
+  box-shadow: var(--shadow-modal);
+}
+.progress-spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--hairline);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-text { font-size: 13px; color: var(--text); font-weight: 500; }
+.progress-detail { font-size: 11px; color: var(--text2); margin-top: 4px; font-family: var(--font-mono); }
+
+/* ── 진행 오버레이 (legacy class) ── */
+.prog-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255, 255, 255, 0.92);
+  z-index: 200;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 14px;
 }
 .prog-overlay.open { display: flex; }
 .prog-ring {
-  width: 56px;
-  height: 56px;
-  border: 4px solid var(--border);
+  width: 28px; height: 28px;
+  border: 2px solid var(--hairline);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin .9s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.prog-text { font-size: 15px; font-weight: 700; color: var(--text2); }
+.prog-text {
+  font-size: 13px; color: var(--text); font-weight: 500;
+  font-family: var(--font-sans);
+}
 .prog-bar-track {
-  width: 260px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
+  width: 240px; height: 2px;
+  background: var(--hairline);
   overflow: hidden;
 }
 .prog-bar-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 2px;
-  transition: width .4s ease;
+  transition: width .2s;
 }
+
+/* ── 자동 저장 복구 배너 ── */
+#autosave-banner {
+  position: fixed;
+  top: 72px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow-md);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  z-index: 250;
+  max-width: 90vw;
+  flex-wrap: wrap;
+}
+#autosave-banner .ab-text { color: var(--text); }
+#autosave-banner .ab-text b { color: var(--accent); font-weight: 600; }
+#autosave-banner .ab-btn {
+  background: var(--surface); border: 1px solid var(--hairline);
+  color: var(--text); padding: 5px 12px; font-size: 11px;
+  cursor: pointer; font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+#autosave-banner .ab-btn:hover { background: var(--surface2); }
+#autosave-banner .ab-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+#autosave-banner .ab-primary:hover { background: var(--accent-hover); }
 
 /* ── 토스트 ── */
 .toast {
   position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: var(--surface);
+  padding: 10px 18px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  z-index: 300;
   opacity: 0;
-  transition: all .3s;
-  z-index: 400;
-  white-space: nowrap;
+  transition: opacity .2s, transform .2s;
   pointer-events: none;
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  box-shadow: var(--shadow-md);
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* ── 스크롤바 ── */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3d3660; }
-</style>
+::-webkit-scrollbar-thumb { background: var(--hairline-strong); }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ── 모바일 ── */
+@media (max-width: 920px) {
+  .main { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--hairline); }
+  .img-grid { grid-template-columns: 1fr 1fr; }
+  .crop-body { flex-direction: column; }
+  .crop-editor.show { flex-direction: column; }
+  .crop-controls { width: 100%; }
+}</style>
+
 </head>
 <body>
 
 <!-- 헤더 -->
 <header class="header">
   <div class="logo">
-    <div class="logo-mark">✂</div>
-    <div>
-      <div class="logo-text">IMGCUT</div>
-      <div class="logo-sub">HTML 이미지 편집기</div>
-    </div>
+    <div class="logo-mark">SE</div>
+    <div class="logo-text">SUNNY EDITOR</div>
   </div>
   <div class="header-actions">
-    <button class="btn btn-ghost" id="btn-reset" onclick="resetAll()" disabled>↩ 초기화</button>
-    <button class="btn btn-teal" id="btn-add-element" onclick="openAddElement()" disabled>✚ 요소 추가</button>
-    <button class="btn btn-green" id="btn-share" onclick="openShare()" disabled>🔗 공유 링크</button>
-    <button class="btn btn-purple" id="btn-zip" onclick="downloadZip()" disabled>📦 ZIP 내보내기</button>
-    <button class="btn btn-yellow" id="btn-download" onclick="downloadNew()" disabled>⬇ 다운로드</button>
-    <button class="btn btn-ghost" id="btn-deploy-guide" onclick="openDeployGuide()" disabled>🌐 배포 안내</button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="lang-btn" data-lang="ko" onclick="setLang('ko')">KO</button>
+      <span class="lang-sep">/</span>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="btn btn-ghost" id="btn-reset" onclick="resetAll()" disabled data-i18n="hdr.reset">초기화</button>
+    <button class="btn" id="btn-add-element" onclick="openAddElement()" disabled data-i18n="hdr.addEl">+ 요소 추가</button>
+    <button class="btn" id="btn-share" onclick="openShare()" disabled data-i18n="hdr.share">공유 링크</button>
+    <button class="btn" id="btn-zip" onclick="downloadZip()" disabled data-i18n="hdr.zip">ZIP</button>
+    <button class="btn btn-primary" id="btn-download" onclick="downloadNew()" disabled data-i18n="hdr.download">다운로드</button>
+    <button class="btn btn-ghost" id="btn-deploy-guide" onclick="openDeployGuide()" disabled data-i18n="hdr.deploy">배포 안내</button>
   </div>
 </header>
 
 <!-- 배포 안내 모달 -->
 <div class="modal-bg" id="deploy-guide-bg" onclick="if(event.target===this)closeDeployGuide()">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6);">
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <h2 style="font-size:16px;font-weight:900;">🌐 내 도메인에 배포하기</h2>
-      <button onclick="closeDeployGuide()" style="background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;">✕</button>
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" data-i18n="deploy.title">내 도메인에 배포하기</span>
+      <button class="modal-close" onclick="closeDeployGuide()">×</button>
     </div>
-    <div style="padding:24px;">
+    <div style="padding:20px 24px;">
 
-      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">✅ 1단계: 편집 완료 후 다운로드</div>
+      <div style="background:var(--surface2);border:1px solid var(--hairline);padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:var(--font-mono);letter-spacing:0.04em;" data-i18n="deploy.s1.h">STEP 1 — 편집 완료 후 다운로드</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
-          위의 <b>⬇ 다운로드</b> 버튼을 클릭하면<br>
-          편집된 HTML 파일이 PC에 저장됩니다.
+          <span data-i18n-html="deploy.s1.b">상단의 <b>다운로드</b> 버튼을 누르면 편집된 HTML 파일이 PC에 저장됩니다.</span>
         </div>
       </div>
 
-      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">✅ 2단계: 호스팅 업체에 업로드</div>
+      <div style="background:var(--surface2);border:1px solid var(--hairline);padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:var(--font-mono);letter-spacing:0.04em;" data-i18n="deploy.s2.h">STEP 2 — 호스팅 업체에 업로드</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
-          도메인을 구매한 호스팅 업체(카페24, 가비아, 후이즈 등)의<br>
-          <b>FTP 또는 파일 관리자</b>에 접속하여<br>
-          다운로드한 HTML 파일을 <b>index.html</b>로 이름을 바꿔서 업로드합니다.
+          <span data-i18n-html="deploy.s2.b">도메인을 구매한 호스팅 업체(카페24, 가비아, 후이즈 등)의 FTP 또는 파일 관리자에 접속하여, 다운로드한 HTML 파일을 <code>index.html</code>로 이름을 바꿔 업로드합니다.</span>
         </div>
       </div>
 
-      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--accent4);margin-bottom:8px;">✅ 3단계: 도메인 연결 확인</div>
+      <div style="background:var(--surface2);border:1px solid var(--hairline);padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:var(--font-mono);letter-spacing:0.04em;" data-i18n="deploy.s3.h">STEP 3 — 도메인 연결 확인</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
-          업로드 후 내 도메인(예: www.example.com)에 접속하여<br>
-          편집된 페이지가 정상적으로 보이는지 확인합니다.
+          <span data-i18n="deploy.s3.b">업로드 후 내 도메인(예: www.example.com)에 접속하여 편집된 페이지가 정상적으로 보이는지 확인합니다.</span>
         </div>
       </div>
 
-      <div style="background:rgba(77,150,255,.08);border:1px solid rgba(77,150,255,.2);border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--accent4);margin-bottom:8px;">💡 무료 호스팅을 쓰고 싶다면?</div>
+      <div style="background:var(--accent-soft);border:1px solid var(--accent);padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;font-family:var(--font-mono);letter-spacing:0.04em;" data-i18n="deploy.note.h">NOTE — 무료 호스팅</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
-          <b>GitHub Pages</b> (무료, 영구)<br>
-          1. <a href="https://github.com" target="_blank" style="color:var(--accent4);">github.com</a> 가입 → 새 저장소(Repository) 생성<br>
-          2. 다운로드한 파일을 <b>index.html</b>로 업로드<br>
+          <b style="color:var(--text);">GitHub Pages</b> (무료)<br>
+          1. <a href="https://github.com" target="_blank">github.com</a> 가입 → 새 저장소(Repository) 생성<br>
+          2. 다운로드한 파일을 <code>index.html</code>로 업로드<br>
           3. Settings → Pages → Branch: main → Save<br>
-          4. 몇 분 후 <b>username.github.io/저장소명</b> 으로 접속 가능<br><br>
-          <b>커스텀 도메인 연결:</b><br>
-          Pages 설정에서 Custom domain에 내 도메인 입력 →<br>
-          도메인 업체(후이즈 등)에서 CNAME 레코드 추가<br>
-          → <b>username.github.io</b> 로 연결
+          4. 몇 분 후 <code>username.github.io/저장소명</code>으로 접속 가능<br><br>
+          <b style="color:var(--text);">커스텀 도메인 연결</b><br>
+          Pages 설정에서 Custom domain 입력 → 도메인 업체(후이즈 등)에서 CNAME 레코드를 <code>username.github.io</code>로 연결.
         </div>
       </div>
 
-      <div style="background:rgba(107,203,119,.08);border:1px solid rgba(107,203,119,.2);border-radius:12px;padding:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">📧 도움이 필요하면</div>
+      <div style="background:var(--surface2);border:1px solid var(--hairline);padding:14px 16px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:var(--font-mono);letter-spacing:0.04em;" data-i18n="deploy.help.h">HELP</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
-          배포 과정에서 어려움이 있으시면<br>
-          편집된 HTML 파일을 첨부하여 관리자에게 전달해 주세요.<br>
-          대신 배포해 드립니다.
+          <span data-i18n="deploy.help.b">배포에 어려움이 있으면 편집된 HTML 파일을 첨부하여 관리자에게 전달해 주세요.</span>
         </div>
       </div>
 
@@ -1039,49 +1244,64 @@ body {
   <!-- 사이드바 -->
   <aside class="sidebar">
     <div class="sidebar-section">
-      <div class="sidebar-label">HTML 파일</div>
+      <div class="sidebar-label" data-i18n="side.load">불러오기</div>
+      <div class="upload-mode-tabs" role="tablist">
+        <button class="um-tab active" id="um-tab-html" onclick="switchUploadMode('html')" role="tab" data-i18n="side.mode.html">HTML</button>
+        <button class="um-tab" id="um-tab-zip" onclick="switchUploadMode('zip')" role="tab" data-i18n="side.mode.zip">ZIP</button>
+        <button class="um-tab" id="um-tab-folder" onclick="switchUploadMode('folder')" role="tab" data-i18n="side.mode.folder">폴더</button>
+      </div>
+
       <div class="file-dropzone" id="file-dropzone"
            ondragover="onFileDragOver(event)" ondragleave="onFileDragLeave(event)" ondrop="onFileDrop(event)"
-           onclick="document.getElementById('file-html-inp').click()">
-        <div class="dz-icon">📄</div>
-        <strong>HTML 파일 업로드</strong>
-        <span>클릭하거나 드래그하세요</span>
+           onclick="triggerActiveUpload()">
+        <strong id="um-zone-title" data-i18n="side.zone.html.title">HTML 파일 업로드</strong>
+        <span id="um-zone-hint" data-i18n="side.zone.html.hint">단일 HTML 파일 1개. 외부 CSS·이미지 미포함.</span>
       </div>
       <input type="file" id="file-html-inp" accept=".html,.htm" style="display:none;" onchange="loadHtmlFile(event)">
+      <input type="file" id="file-zip-inp" accept=".zip" style="display:none;" onchange="loadZipFile(event)">
+      <input type="file" id="file-folder-inp" webkitdirectory directory multiple style="display:none;" onchange="loadFolderFiles(event)">
+
       <div class="file-info" id="file-info">
         <div class="file-info-name" id="file-name-display">—</div>
         <div class="file-info-stats">
           <span class="stat-chip" id="file-size-display">—</span>
           <span class="stat-chip" id="file-img-count">—</span>
+          <span class="stat-chip" id="file-mode-chip" style="display:none;">—</span>
         </div>
+      </div>
+
+      <!-- 다중 HTML 페이지 선택 -->
+      <div id="page-picker" style="display:none; margin-top: 12px;">
+        <div class="sidebar-label" style="margin-bottom: 6px;" data-i18n="side.pagePicker">페이지 선택</div>
+        <select id="page-select" onchange="switchPage(this.value)" class="ae-input" style="width:100%; padding:6px 8px; font-size:11px; font-family:var(--font-mono);"></select>
       </div>
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-label">작업 현황</div>
+      <div class="sidebar-label" data-i18n="side.status">작업 현황</div>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-num blue" id="s-total">0</div>
-          <div class="stat-label">전체 이미지</div>
+          <div class="stat-num blue is-zero" id="s-total">0</div>
+          <div class="stat-label" data-i18n="side.stat.total">전체 이미지</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num yellow" id="s-changed">0</div>
-          <div class="stat-label">변경됨</div>
+          <div class="stat-num yellow is-zero" id="s-changed">0</div>
+          <div class="stat-label" data-i18n="side.stat.changed">변경됨</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num red" id="s-deleted">0</div>
-          <div class="stat-label">삭제</div>
+          <div class="stat-num red is-zero" id="s-deleted">0</div>
+          <div class="stat-label" data-i18n="side.stat.deleted">삭제</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num green" id="s-replaced">0</div>
-          <div class="stat-label">교체</div>
+          <div class="stat-num green is-zero" id="s-replaced">0</div>
+          <div class="stat-label" data-i18n="side.stat.replaced">교체</div>
         </div>
       </div>
     </div>
 
-    <div class="sidebar-label" style="padding: 16px 20px 4px;">변경 목록</div>
+    <div class="sidebar-label" style="padding: 16px 20px 4px;" data-i18n="side.changes">변경 목록</div>
     <div class="change-list" id="change-list">
-      <div class="change-empty">변경 사항 없음</div>
+      <div class="change-empty" data-i18n="side.changes.empty">변경 사항 없음</div>
     </div>
   </aside>
 
@@ -1090,10 +1310,78 @@ body {
 
     <!-- 빈 화면 -->
     <div class="empty-screen" id="empty-screen">
-      <div class="empty-icon">🖼</div>
-      <h2>HTML 파일을 불러오세요</h2>
-      <p>왼쪽 사이드바에서 HTML 파일을 업로드하면<br>파일 안의 이미지를 모두 감지해서<br>교체하거나 삭제할 수 있어요</p>
-      <button class="btn btn-red" onclick="document.getElementById('file-html-inp').click()">📄 파일 선택하기</button>
+      <div class="empty-eyebrow" data-i18n="empty.eyebrow">SUNNY WEB EDITOR · 무료 · 회원가입 X</div>
+      <h1 class="empty-headline">
+        <span data-i18n="empty.headline.l1">코드 없이</span>
+        <span><span data-i18n="empty.headline.l2.pre">HTML 페이지의 </span><em data-i18n="empty.headline.l2.em">이미지·텍스트</em><span data-i18n="empty.headline.l2.post">를</span></span>
+        <span data-i18n="empty.headline.l3">한 번에 편집.</span>
+      </h1>
+      <p id="empty-desc" class="empty-lede">왼쪽 사이드바에서 파일을 업로드하면<br>파일 안의 이미지와 텍스트가 자동으로 감지됩니다.</p>
+
+      <!-- 3단계 워크플로 다이어그램 -->
+      <div class="workflow">
+        <div class="wf-step">
+          <div class="wf-num">01</div>
+          <div class="wf-art" aria-hidden="true">
+            <svg viewBox="0 0 96 64" width="96" height="64">
+              <rect x="14" y="6" width="68" height="52" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <rect x="20" y="14" width="42" height="6" fill="currentColor" opacity="0.7"/>
+              <rect x="20" y="26" width="56" height="3" fill="currentColor" opacity="0.35"/>
+              <rect x="20" y="33" width="48" height="3" fill="currentColor" opacity="0.35"/>
+              <rect x="20" y="42" width="22" height="14" fill="currentColor" opacity="0.18"/>
+              <rect x="46" y="42" width="22" height="14" fill="currentColor" opacity="0.18"/>
+            </svg>
+          </div>
+          <div class="wf-title" data-i18n="empty.wf.1.t">파일 업로드</div>
+          <div class="wf-desc" data-i18n="empty.wf.1.d">HTML · ZIP · 폴더</div>
+        </div>
+        <div class="wf-arrow" aria-hidden="true">
+          <svg viewBox="0 0 32 14" width="32" height="14"><path d="M0 7 L26 7 M20 1 L26 7 L20 13" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">02</div>
+          <div class="wf-art" aria-hidden="true">
+            <svg viewBox="0 0 96 64" width="96" height="64">
+              <rect x="6" y="6" width="38" height="52" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <rect x="11" y="11" width="28" height="20" fill="currentColor" opacity="0.18"/>
+              <rect x="11" y="36" width="28" height="3" fill="currentColor" opacity="0.45"/>
+              <rect x="11" y="43" width="22" height="3" fill="currentColor" opacity="0.35"/>
+              <rect x="11" y="50" width="18" height="3" fill="currentColor" opacity="0.35"/>
+              <rect x="52" y="6" width="38" height="52" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+              <rect x="57" y="11" width="28" height="20" fill="var(--accent)" opacity="0.20"/>
+              <rect x="57" y="36" width="28" height="3" fill="var(--accent)" opacity="0.55"/>
+              <rect x="57" y="43" width="22" height="3" fill="var(--accent)" opacity="0.45"/>
+              <rect x="57" y="50" width="18" height="3" fill="var(--accent)" opacity="0.45"/>
+            </svg>
+          </div>
+          <div class="wf-title" data-i18n="empty.wf.2.t">교체 · 수정</div>
+          <div class="wf-desc" data-i18n="empty.wf.2.d">카드 단위로 즉시</div>
+        </div>
+        <div class="wf-arrow" aria-hidden="true">
+          <svg viewBox="0 0 32 14" width="32" height="14"><path d="M0 7 L26 7 M20 1 L26 7 L20 13" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">03</div>
+          <div class="wf-art" aria-hidden="true">
+            <svg viewBox="0 0 96 64" width="96" height="64">
+              <rect x="14" y="6" width="68" height="52" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+              <rect x="20" y="14" width="42" height="6" fill="var(--accent)" opacity="0.75"/>
+              <rect x="20" y="26" width="56" height="3" fill="var(--accent)" opacity="0.45"/>
+              <rect x="20" y="33" width="48" height="3" fill="var(--accent)" opacity="0.45"/>
+              <rect x="20" y="42" width="22" height="14" fill="var(--accent)" opacity="0.25"/>
+              <rect x="46" y="42" width="22" height="14" fill="var(--accent)" opacity="0.25"/>
+            </svg>
+          </div>
+          <div class="wf-title" data-i18n="empty.wf.3.t">다운로드</div>
+          <div class="wf-desc" data-i18n="empty.wf.3.d">HTML 또는 사이트 ZIP</div>
+        </div>
+      </div>
+
+      <div class="empty-actions">
+        <button id="empty-btn" class="btn btn-primary btn-lg" onclick="triggerActiveUpload()" data-i18n="empty.btn.html">파일 선택</button>
+        <button class="btn btn-lg" onclick="loadSample('bakery')" data-i18n="empty.btn.sample">샘플로 체험</button>
+        <a class="btn btn-ghost btn-lg" href="./guide.html" data-i18n="empty.btn.guide">사용 가이드 →</a>
+      </div>
     </div>
 
     <!-- 탭 + 에디터 -->
@@ -1101,26 +1389,26 @@ body {
 
       <!-- 탭바 -->
       <div class="tabbar">
-        <button class="tab active" id="tab-img" onclick="switchTab('img')">🖼 이미지</button>
-        <button class="tab" id="tab-txt" onclick="switchTab('txt')">✏️ 텍스트</button>
-        <button class="tab" id="tab-preview" onclick="switchTab('preview')">👁 미리보기</button>
+        <button class="tab active" id="tab-img" onclick="switchTab('img')" data-i18n="tab.image">이미지</button>
+        <button class="tab" id="tab-txt" onclick="switchTab('txt')" data-i18n="tab.text">텍스트</button>
+        <button class="tab" id="tab-preview" onclick="switchTab('preview')" data-i18n="tab.preview">미리보기</button>
       </div>
 
       <!-- 필터바 (탭 아래 별도 줄) -->
       <div class="filterbar">
         <div class="filter-chips" id="img-filters">
-          <span class="filter-label">필터:</span>
-          <div class="filter-chip active" data-filter="all" onclick="setFilter('all')">전체</div>
-          <div class="filter-chip" data-filter="normal" onclick="setFilter('normal')">변경 없음</div>
-          <div class="filter-chip" data-filter="replaced" onclick="setFilter('replaced')">교체됨</div>
-          <div class="filter-chip" data-filter="deleted" onclick="setFilter('deleted')">삭제됨</div>
+          <span class="filter-label"><span data-i18n="filter.label">필터</span>:</span>
+          <div class="filter-chip active" data-filter="all" onclick="setFilter('all')" data-i18n="filter.all">전체</div>
+          <div class="filter-chip" data-filter="normal" onclick="setFilter('normal')" data-i18n="filter.normal">변경 없음</div>
+          <div class="filter-chip" data-filter="replaced" onclick="setFilter('replaced')" data-i18n="filter.replaced">교체됨</div>
+          <div class="filter-chip" data-filter="deleted" onclick="setFilter('deleted')" data-i18n="filter.deleted">삭제됨</div>
         </div>
         <div class="filter-chips" id="txt-filters" style="display:none;">
-          <span class="filter-label">필터:</span>
-          <div class="filter-chip active" data-tfilter="all" onclick="setTxtFilter('all')">전체</div>
-          <div class="filter-chip" data-tfilter="heading" onclick="setTxtFilter('heading')">제목</div>
-          <div class="filter-chip" data-tfilter="body" onclick="setTxtFilter('body')">본문</div>
-          <div class="filter-chip" data-tfilter="edited" onclick="setTxtFilter('edited')">수정됨</div>
+          <span class="filter-label"><span data-i18n="filter.label">필터</span>:</span>
+          <div class="filter-chip active" data-tfilter="all" onclick="setTxtFilter('all')" data-i18n="filter.all">전체</div>
+          <div class="filter-chip" data-tfilter="heading" onclick="setTxtFilter('heading')" data-i18n="filter.heading">제목</div>
+          <div class="filter-chip" data-tfilter="body" onclick="setTxtFilter('body')" data-i18n="filter.body">본문</div>
+          <div class="filter-chip" data-tfilter="edited" onclick="setTxtFilter('edited')" data-i18n="filter.edited">수정됨</div>
         </div>
       </div>
 
@@ -1141,8 +1429,8 @@ body {
       <!-- 미리보기 탭 패널 -->
       <div class="tab-panel" id="panel-preview" style="display:none; flex:1; flex-direction:column;">
         <div class="preview-toolbar">
-          <span style="font-size:13px; color:var(--text2);">변경사항이 반영된 최종 결과물</span>
-          <button class="btn btn-ghost btn-sm" onclick="refreshPreview()">🔄 새로고침</button>
+          <span style="font-size:13px; color:var(--text2);" data-i18n="preview.toolbar.note">변경사항이 반영된 최종 결과물</span>
+          <button class="btn btn-ghost btn-sm" onclick="refreshPreview()" data-i18n="preview.refresh">새로고침</button>
         </div>
         <iframe id="preview-iframe" style="flex:1; border:none; background:#fff;"></iframe>
       </div>
@@ -1156,15 +1444,15 @@ body {
 <div class="modal-bg" id="add-element-modal-bg" onclick="if(event.target===this)closeAddElement()">
   <div class="modal-box" style="width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;">
     <div class="modal-header">
-      <span class="modal-title">✚ 요소 추가</span>
-      <button class="modal-close" onclick="closeAddElement()">✕</button>
+      <span class="modal-title" data-i18n="ae.title">요소 추가</span>
+      <button class="modal-close" onclick="closeAddElement()">×</button>
     </div>
     <div style="padding:20px;">
 
       <!-- 탭 -->
       <div style="display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <button class="ae-tab active" id="ae-tab-popup" onclick="switchAeTab('popup')">🪟 팝업 배너</button>
-        <button class="ae-tab" id="ae-tab-cookie" onclick="switchAeTab('cookie')">🍪 쿠키 동의</button>
+        <button class="ae-tab active" id="ae-tab-popup" onclick="switchAeTab('popup')" data-i18n="ae.tab.popup">팝업 배너</button>
+        <button class="ae-tab" id="ae-tab-cookie" onclick="switchAeTab('cookie')" data-i18n="ae.tab.cookie">쿠키 동의</button>
       </div>
 
       <!-- ── 팝업 배너 패널 ── -->
@@ -1172,32 +1460,32 @@ body {
 
         <!-- 이미지 크기 (필수) -->
         <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;border:1px solid var(--border);">
-          <div style="font-size:12px;font-weight:700;color:var(--accent4);margin-bottom:10px;">📷 팝업 이미지 크기</div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;" data-i18n="ae.popup.size">팝업 이미지 크기</div>
           <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
             <div>
-              <label class="ae-label">가로 (px)</label>
+              <label class="ae-label" data-i18n="ae.popup.w">가로 (px)</label>
               <input type="number" class="ae-input" id="ae-popup-imgw" placeholder="예: 500" value="500">
             </div>
             <span style="font-size:13px;color:var(--text2);margin-top:16px;">×</span>
             <div>
-              <label class="ae-label">세로 (px)</label>
+              <label class="ae-label" data-i18n="ae.popup.h">세로 (px)</label>
               <input type="number" class="ae-input" id="ae-popup-imgh" placeholder="예: 400" value="400">
             </div>
           </div>
           <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.6;">
-            💡 팝업을 추가하면 이미지 에디터 카드에 나타나요.<br>🔄 교체 버튼으로 디자인한 이미지를 넣으세요.
+            팝업 추가 후 이미지 카드에 나타납니다. 교체 버튼으로 디자인된 이미지를 적용하세요.
           </div>
         </div>
 
         <!-- 클릭 링크 -->
         <div class="ae-field-group">
-          <label class="ae-label">이미지 클릭 시 이동 링크 (선택)</label>
-          <input type="text" class="ae-input" id="ae-popup-link" placeholder="https://... 또는 비워두면 링크 없음">
+          <label class="ae-label" data-i18n="ae.popup.link">이미지 클릭 시 이동 링크 (선택)</label>
+          <input type="text" class="ae-input" id="ae-popup-link" placeholder="https://... 또는 비워두면 링크 없음" data-i18n-placeholder="ae.popup.link.ph">
         </div>
 
         <!-- 팝업 최대 너비 -->
         <div class="ae-field-group">
-          <label class="ae-label">팝업 최대 너비</label>
+          <label class="ae-label" data-i18n="ae.popup.maxw">팝업 최대 너비</label>
           <select class="ae-input" id="ae-popup-maxw">
             <option value="360px">좁게 (360px)</option>
             <option value="480px">보통 (480px)</option>
@@ -1208,7 +1496,7 @@ body {
 
         <!-- 타이밍 -->
         <div class="ae-field-group">
-          <label class="ae-label">표시 타이밍</label>
+          <label class="ae-label" data-i18n="ae.popup.timing">표시 타이밍</label>
           <select class="ae-input" id="ae-popup-timing">
             <option value="0">즉시</option>
             <option value="2000">2초 후</option>
@@ -1219,31 +1507,31 @@ body {
         </div>
 
         <div class="ae-check-row">
-          <label><input type="checkbox" id="ae-popup-today" checked> "오늘 하루 안 보기" 버튼 포함</label>
+          <label><input type="checkbox" id="ae-popup-today" checked> <span data-i18n="ae.popup.today">"오늘 하루 안 보기" 버튼 포함</span></label>
         </div>
         <div class="ae-check-row">
-          <label><input type="checkbox" id="ae-popup-closeout" checked> 배경 클릭 시 닫기</label>
+          <label><input type="checkbox" id="ae-popup-closeout" checked> <span data-i18n="ae.popup.bgclose">배경 클릭 시 닫기</span></label>
         </div>
       </div>
 
       <!-- ── 쿠키 동의 패널 ── -->
       <div id="ae-panel-cookie" style="display:none;">
         <div class="ae-field-group">
-          <label class="ae-label">안내 텍스트</label>
+          <label class="ae-label" data-i18n="ae.cookie.text">안내 텍스트</label>
           <textarea class="ae-input" id="ae-cookie-text" rows="2">이 웹사이트는 최적의 경험을 위해 쿠키를 사용합니다.</textarea>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="ae-field-group">
-            <label class="ae-label">동의 버튼</label>
+            <label class="ae-label" data-i18n="ae.cookie.accept">동의 버튼</label>
             <input type="text" class="ae-input" id="ae-cookie-accept" value="동의합니다">
           </div>
           <div class="ae-field-group">
-            <label class="ae-label">거부 버튼</label>
+            <label class="ae-label" data-i18n="ae.cookie.decline">거부 버튼</label>
             <input type="text" class="ae-input" id="ae-cookie-decline" value="거부">
           </div>
         </div>
         <div class="ae-field-group">
-          <label class="ae-label">위치</label>
+          <label class="ae-label" data-i18n="ae.cookie.pos">위치</label>
           <select class="ae-input" id="ae-cookie-pos">
             <option value="bottom" selected>하단 전체</option>
             <option value="bottom-left">하단 좌측</option>
@@ -1252,11 +1540,11 @@ body {
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="ae-field-group">
-            <label class="ae-label">배경색</label>
+            <label class="ae-label" data-i18n="ae.cookie.bg">배경색</label>
             <input type="color" class="ae-color" id="ae-cookie-bg" value="#2d2d2d">
           </div>
           <div class="ae-field-group">
-            <label class="ae-label">동의 버튼색</label>
+            <label class="ae-label" data-i18n="ae.cookie.btnc">동의 버튼색</label>
             <input type="color" class="ae-color" id="ae-cookie-btncolor" value="#4d96ff">
           </div>
         </div>
@@ -1264,15 +1552,15 @@ body {
 
       <!-- 미리보기 -->
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.05em;">미리보기</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.05em;" data-i18n="ae.preview">미리보기</div>
         <div id="ae-preview-box" style="background:var(--surface2);border-radius:10px;padding:16px;min-height:80px;">
           <div id="ae-preview-content"></div>
         </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button class="btn btn-ghost" onclick="closeAddElement()">취소</button>
-        <button class="btn btn-teal" onclick="applyAddElement()">✚ HTML에 추가</button>
+        <button class="btn btn-ghost" onclick="closeAddElement()" data-i18n="crop.cancel">취소</button>
+        <button class="btn btn-primary" onclick="applyAddElement()" data-i18n="ae.add">HTML에 추가</button>
       </div>
     </div>
   </div>
@@ -1282,10 +1570,10 @@ body {
   <div class="crop-modal">
     <div class="crop-header">
       <div>
-        <h2 id="crop-modal-title">🔄 이미지 교체</h2>
-        <p id="crop-modal-sub">새 이미지를 업로드하고 트리밍 및 위치를 조정하세요</p>
+        <h2 id="crop-modal-title" data-i18n="crop.title">이미지 교체</h2>
+        <p id="crop-modal-sub" data-i18n="crop.sub">새 이미지를 업로드하고 트리밍 및 위치를 조정하세요</p>
       </div>
-      <button class="btn btn-ghost btn-icon" onclick="closeCropModal()">✕</button>
+      <button class="btn btn-ghost btn-icon" onclick="closeCropModal()">×</button>
     </div>
     <div class="crop-body">
 
@@ -1293,9 +1581,9 @@ body {
       <div class="upload-zone" id="upload-zone"
            ondragover="onImgDragOver(event)" ondragleave="onImgDragLeave(event)" ondrop="onImgDrop(event)"
            onclick="document.getElementById('file-img-inp').click()">
-        <div class="uz-icon">📁</div>
-        <strong>이미지 업로드</strong>
-        <span>클릭 또는 드래그 · PNG, JPG, WEBP</span>
+        
+        <strong data-i18n="crop.upload">이미지 업로드</strong>
+        <span data-i18n="crop.upload.hint">클릭 또는 드래그 · PNG, JPG, WEBP</span>
       </div>
       <input type="file" id="file-img-inp" accept="image/*" style="display:none;" onchange="onImgFileChange(event)">
 
@@ -1307,9 +1595,9 @@ body {
         </div>
         <div class="crop-controls">
           <div class="crop-controls-row">
-            <span class="ctrl-label">비율</span>
+            <span class="ctrl-label" data-i18n="crop.ratio">비율</span>
             <div class="ratio-btns">
-              <button class="ratio-btn active" data-ratio="free" onclick="setRatio('free',this)">자유</button>
+              <button class="ratio-btn active" data-ratio="free" onclick="setRatio('free',this)" data-i18n="crop.ratio.free">자유</button>
               <button class="ratio-btn" data-ratio="16:9" onclick="setRatio('16:9',this)">16:9</button>
               <button class="ratio-btn" data-ratio="4:3" onclick="setRatio('4:3',this)">4:3</button>
               <button class="ratio-btn" data-ratio="3:2" onclick="setRatio('3:2',this)">3:2</button>
@@ -1319,14 +1607,14 @@ body {
             </div>
           </div>
           <div class="crop-controls-row">
-            <span class="ctrl-label">정렬</span>
+            <span class="ctrl-label" data-i18n="crop.align">정렬</span>
             <div class="ratio-btns">
-              <button class="ratio-btn" onclick="alignCrop('center')">⊞ 센터</button>
-              <button class="ratio-btn" onclick="alignCrop('top')">⬆ 상단</button>
-              <button class="ratio-btn" onclick="alignCrop('bottom')">⬇ 하단</button>
-              <button class="ratio-btn" onclick="alignCrop('left')">⬅ 좌측</button>
-              <button class="ratio-btn" onclick="alignCrop('right')">➡ 우측</button>
-              <button class="ratio-btn" onclick="alignCrop('full')">📐 전체</button>
+              <button class="ratio-btn" onclick="alignCrop('center')" data-i18n="crop.align.center">⊞ 센터</button>
+              <button class="ratio-btn" onclick="alignCrop('top')" data-i18n="crop.align.top">⬆ 상단</button>
+              <button class="ratio-btn" onclick="alignCrop('bottom')" data-i18n="crop.align.bottom">하단</button>
+              <button class="ratio-btn" onclick="alignCrop('left')" data-i18n="crop.align.left">⬅ 좌측</button>
+              <button class="ratio-btn" onclick="alignCrop('right')" data-i18n="crop.align.right">➡ 우측</button>
+              <button class="ratio-btn" onclick="alignCrop('full')" data-i18n="crop.align.full">전체</button>
             </div>
           </div>
         </div>
@@ -1334,18 +1622,18 @@ body {
 
       <!-- 미리보기 -->
       <div class="preview-panel">
-        <div class="preview-panel-title">미리보기</div>
+        <div class="preview-panel-title" data-i18n="crop.preview">미리보기</div>
         <div class="preview-boxes">
           <div class="preview-box-item">
-            <div class="preview-box-label">가로형</div>
+            <div class="preview-box-label" data-i18n="crop.preview.wide">가로형</div>
             <img class="preview-thumb" id="preview-wide" src="" alt="">
           </div>
           <div class="preview-box-item">
-            <div class="preview-box-label">정사각형</div>
+            <div class="preview-box-label" data-i18n="crop.preview.sq">정사각형</div>
             <img class="preview-thumb-sq" id="preview-sq" src="" alt="">
           </div>
           <div class="preview-box-item">
-            <div class="preview-box-label">원본</div>
+            <div class="preview-box-label" data-i18n="crop.preview.orig">원본</div>
             <img class="preview-thumb" id="preview-orig" src="" alt="" style="object-fit:contain;">
           </div>
         </div>
@@ -1353,9 +1641,9 @@ body {
 
     </div>
     <div class="crop-footer">
-      <button class="btn btn-ghost" onclick="closeCropModal()">취소</button>
-      <button class="btn btn-ghost" id="btn-skip-crop" onclick="skipCrop()">원본 그대로 사용</button>
-      <button class="btn btn-green" id="btn-apply-crop" onclick="applyCrop()" disabled>✅ 교체 적용</button>
+      <button class="btn btn-ghost" onclick="closeCropModal()" data-i18n="crop.cancel">취소</button>
+      <button class="btn btn-ghost" id="btn-skip-crop" onclick="skipCrop()" data-i18n="crop.skip">원본 그대로 사용</button>
+      <button class="btn btn-primary" id="btn-apply-crop" onclick="applyCrop()" disabled data-i18n="crop.apply">교체 적용</button>
     </div>
   </div>
 </div>
@@ -1364,23 +1652,23 @@ body {
 <div class="modal-bg" id="share-modal-bg">
   <div class="share-modal">
     <div class="share-header">
-      <h2>🔗 공유 링크 생성</h2>
-      <p>변경사항이 적용된 HTML을 공유할 방법을 선택하세요</p>
+      <h2 data-i18n="share.title">공유 링크 생성</h2>
+      <p data-i18n="share.sub">변경사항이 적용된 HTML을 공유할 방법을 선택하세요</p>
     </div>
     <div class="share-body">
       <div class="share-options" id="share-options">
         <div class="share-opt selected" data-type="github-gist" onclick="selectShareOpt(this,'github-gist')">
           <div class="share-opt-icon">🚀</div>
           <div class="share-opt-info">
-            <strong>공유 링크 생성</strong>
-            <span>버튼 하나로 즉시 공유 URL 생성 · 누구나 접근 가능 · 무료</span>
+            <strong data-i18n="share.opt.url.t">공유 링크 생성</strong>
+            <span data-i18n="share.opt.url.d">버튼 하나로 즉시 공유 URL 생성 · 누구나 접근 가능 · 무료</span>
           </div>
         </div>
         <div class="share-opt" data-type="download-share" onclick="selectShareOpt(this,'download-share')">
           <div class="share-opt-icon">📤</div>
           <div class="share-opt-info">
-            <strong>파일 다운로드 후 공유</strong>
-            <span>파일을 저장하고 구글 드라이브, 카카오톡 등으로 직접 공유</span>
+            <strong data-i18n="share.opt.file.t">파일 다운로드 후 공유</strong>
+            <span data-i18n="share.opt.file.d">파일을 저장하고 구글 드라이브, 카카오톡 등으로 직접 공유</span>
           </div>
         </div>
       </div>
@@ -1395,8 +1683,8 @@ body {
       </div>
     </div>
     <div class="share-footer">
-      <button class="btn btn-ghost" onclick="closeShare()">닫기</button>
-      <button class="btn btn-red" id="btn-gen-share" onclick="generateShare()">링크 생성</button>
+      <button class="btn btn-ghost" onclick="closeShare()" data-i18n="share.close">닫기</button>
+      <button class="btn btn-primary" id="btn-gen-share" onclick="generateShare()" data-i18n="share.generate">링크 생성</button>
     </div>
   </div>
 </div>
@@ -1413,6 +1701,436 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
+// ════════════════════════════════════
+//  i18n (KO / EN) — 한국어 / 영어
+// ════════════════════════════════════
+const I18N = {
+  ko: {
+    // 헤더
+    'hdr.reset': '초기화',
+    'hdr.addEl': '+ 배너 추가',
+    'hdr.share': '공유 링크',
+    'hdr.zip': 'ZIP',
+    'hdr.download': '다운로드',
+    'hdr.deploy': '배포 안내',
+    // 사이드바
+    'side.load': '불러오기',
+    'side.mode.html': 'HTML',
+    'side.mode.zip': 'ZIP',
+    'side.mode.folder': '폴더',
+    'side.zone.html.title': 'HTML 파일 업로드',
+    'side.zone.html.hint': '단일 HTML 파일 1개. 외부 CSS·이미지 미포함.',
+    'side.zone.zip.title': 'ZIP 파일 업로드',
+    'side.zone.zip.hint': '사이트 통째 (HTML + CSS + 이미지). 폴더를 ZIP으로 묶어서.',
+    'side.zone.folder.title': '폴더 통째 선택',
+    'side.zone.folder.hint': '폴더 선택 (Chrome / Edge 전용). HTML + CSS + 이미지 한 번에.',
+    'side.pagePicker': '페이지 선택',
+    'side.status': '작업 현황',
+    'side.stat.total': '전체 이미지',
+    'side.stat.changed': '변경됨',
+    'side.stat.deleted': '삭제',
+    'side.stat.replaced': '교체',
+    'side.changes': '변경 목록',
+    'side.changes.empty': '변경 사항 없음',
+    // 빈 화면
+    'empty.eyebrow': 'SUNNY EDITOR · 무료 · 회원가입 X',
+    'empty.headline.l1': '코드 없이',
+    'empty.headline.l2.pre': 'HTML 페이지의 ',
+    'empty.headline.l2.em': '이미지·텍스트',
+    'empty.headline.l2.post': '를',
+    'empty.headline.l3': '한 번에 편집.',
+    'empty.desc.html': '왼쪽 사이드바에서 HTML 파일을 업로드하면<br>파일 안의 이미지와 텍스트가 자동으로 감지됩니다.',
+    'empty.desc.zip': 'HTML + CSS + 이미지 폴더를 통째로 묶은 ZIP을<br>왼쪽 사이드바에 업로드하면 외부 CSS·이미지까지 모두 편집됩니다.',
+    'empty.desc.folder': '폴더 전체를 한 번에 선택하면 (Chrome · Edge)<br>안의 HTML·CSS·이미지가 자동으로 인식됩니다.',
+    'empty.wf.1.t': '파일 업로드',
+    'empty.wf.1.d': 'HTML · ZIP · 폴더',
+    'empty.wf.2.t': '교체 · 수정',
+    'empty.wf.2.d': '카드 단위로 즉시',
+    'empty.wf.3.t': '다운로드',
+    'empty.wf.3.d': 'HTML 또는 사이트 ZIP',
+    'empty.btn.html': 'HTML 파일 선택',
+    'empty.btn.zip': 'ZIP 파일 선택',
+    'empty.btn.folder': '폴더 선택',
+    'empty.btn.sample': '샘플로 체험',
+    'empty.btn.guide': '사용 가이드 →',
+    'empty.title.html': 'HTML 파일을 불러오세요',
+    'empty.title.zip': '사이트 ZIP을 불러오세요',
+    'empty.title.folder': '사이트 폴더를 선택하세요',
+    // 탭
+    'tab.image': '이미지',
+    'tab.text': '텍스트',
+    'tab.preview': '미리보기',
+    // 필터
+    'filter.label': '필터',
+    'filter.all': '전체',
+    'filter.normal': '변경 없음',
+    'filter.replaced': '교체됨',
+    'filter.deleted': '삭제됨',
+    'filter.heading': '제목',
+    'filter.body': '본문',
+    'filter.edited': '수정됨',
+    'preview.toolbar.note': '변경사항이 반영된 최종 결과물',
+    'preview.refresh': '새로고침',
+    // 카드 액션
+    'card.replace': '교체',
+    'card.size': '크기',
+    'card.delete': '삭제',
+    'card.restoreDel': '취소',
+    'card.replaceNeeded': '교체 필요',
+    'card.sizeAuto': '크기 미지정',
+    'card.deleted': '삭제됨',
+    'card.replaced': '교체됨',
+    'card.externalUrl': '외부 URL',
+    // 크롭 모달
+    'crop.title': '이미지 교체',
+    'crop.sub': '새 이미지를 업로드하고 트리밍 및 위치를 조정하세요',
+    'crop.upload': '이미지 업로드',
+    'crop.upload.hint': '클릭 또는 드래그 · PNG, JPG, WEBP',
+    'crop.ratio': '비율',
+    'crop.align': '정렬',
+    'crop.ratio.free': '자유',
+    'crop.align.center': '⊞ 센터',
+    'crop.align.top': '⬆ 상단',
+    'crop.align.bottom': '하단',
+    'crop.align.left': '⬅ 좌측',
+    'crop.align.right': '➡ 우측',
+    'crop.align.full': '전체',
+    'crop.preview': '미리보기',
+    'crop.preview.wide': '가로형',
+    'crop.preview.sq': '정사각형',
+    'crop.preview.orig': '원본',
+    'crop.cancel': '취소',
+    'crop.skip': '원본 그대로 사용',
+    'crop.apply': '교체 적용',
+    // 공유 모달
+    'share.title': '공유 링크 생성',
+    'share.sub': '변경사항이 적용된 HTML을 공유할 방법을 선택하세요',
+    'share.opt.url.t': '공유 링크 생성',
+    'share.opt.url.d': '버튼 하나로 즉시 공유 URL 생성 · 누구나 접근 가능 · 무료',
+    'share.opt.file.t': '파일 다운로드 후 공유',
+    'share.opt.file.d': '파일을 저장하고 구글 드라이브, 카카오톡 등으로 직접 공유',
+    'share.close': '닫기',
+    'share.generate': '링크 생성',
+    // 요소 추가 모달
+    'ae.title': '배너 추가',
+    'ae.tab.popup': '팝업 배너',
+    'ae.tab.cookie': '쿠키 동의',
+    'ae.popup.size': '팝업 이미지 크기',
+    'ae.popup.w': '가로 (px)',
+    'ae.popup.h': '세로 (px)',
+    'ae.popup.link': '이미지 클릭 시 이동 링크 (선택)',
+    'ae.popup.link.ph': 'https://... 또는 비워두면 링크 없음',
+    'ae.popup.maxw': '팝업 최대 너비',
+    'ae.popup.timing': '표시 타이밍',
+    'ae.popup.today': '"오늘 하루 안 보기" 버튼 포함',
+    'ae.popup.bgclose': '배경 클릭 시 닫기',
+    'ae.preview': '미리보기',
+    'ae.cookie.text': '쿠키 안내 문구',
+    'ae.cookie.accept': '동의 버튼',
+    'ae.cookie.decline': '거부 버튼',
+    'ae.cookie.pos': '위치',
+    'ae.cookie.bg': '배경색',
+    'ae.cookie.btnc': '버튼 색',
+    'ae.add': 'HTML에 추가',
+    // 배포 모달
+    'deploy.title': '내 도메인에 배포하기',
+    'deploy.s1.h': 'STEP 1 — 편집 완료 후 다운로드',
+    'deploy.s1.b': '상단의 다운로드 버튼을 누르면 편집된 HTML 파일이 PC에 저장됩니다.',
+    'deploy.s2.h': 'STEP 2 — 호스팅 업체에 업로드',
+    'deploy.s2.b': '<span data-i18n-html="deploy.s2.b">도메인을 구매한 호스팅 업체(카페24, 가비아, 후이즈 등)의 FTP 또는 파일 관리자에 접속하여, 다운로드한 HTML 파일을 <code>index.html</code>로 이름을 바꿔 업로드합니다.</span>',
+    'deploy.s3.h': 'STEP 3 — 도메인 연결 확인',
+    'deploy.s3.b': '<span data-i18n="deploy.s3.b">업로드 후 내 도메인(예: www.example.com)에 접속하여 편집된 페이지가 정상적으로 보이는지 확인합니다.</span>',
+    'deploy.note.h': 'NOTE — 무료 호스팅',
+    'deploy.note.b': '<b>GitHub Pages</b> (무료)<br>1. <a href="https://github.com" target="_blank">github.com</a> 가입 → 새 저장소(Repository) 생성<br>2. 다운로드한 파일을 <code>index.html</code>로 업로드<br>3. Settings → Pages → Branch: main → Save<br>4. 몇 분 후 <code>username.github.io/저장소명</code>으로 접속 가능<br><br><b>커스텀 도메인 연결</b><br>Pages 설정에서 Custom domain 입력 → 도메인 업체(후이즈 등)에서 CNAME 레코드를 <code>username.github.io</code>로 연결.',
+    'deploy.help.h': 'HELP',
+    'deploy.help.b': '<span data-i18n="deploy.help.b">배포에 어려움이 있으면 편집된 HTML 파일을 첨부하여 관리자에게 전달해 주세요.</span>',
+    // 푸터
+    'footer.copy': '© 2026 SUNNY ENTERTAINMENT INC. All rights reserved.',
+    // 동적 메시지
+    'msg.htmlOnly': 'HTML, ZIP 또는 폴더만 지원합니다',
+    'msg.imgLoaded': '이미지 {n}개 로드 완료',
+    'msg.imgReplaced': '이미지 교체 완료',
+    'msg.noChanges': '변경 사항이 없습니다',
+    'msg.downloaded': '다운로드 완료',
+    'msg.zipDone': '사이트 ZIP 다운로드 완료',
+    'msg.addOk': '추가 완료. 이미지 탭에서 팝업 이미지를 교체하세요.',
+    'msg.zipOk': 'ZIP 완료 — 원본·수정본 HTML·이미지·텍스트 문서',
+    'msg.zipOkNoEdit': 'ZIP 완료 — 원본 HTML·이미지·텍스트 문서',
+    'msg.shareOk': '공유 링크 생성 완료. URL을 슬랙·카카오톡·이메일로 보내세요.',
+    'msg.zipErr': 'ZIP 처리 오류: {e}',
+    'msg.folderErr': '폴더 처리 오류: {e}',
+    'msg.noHtml': 'HTML 파일을 찾을 수 없습니다',
+    'msg.sampleErr': '샘플 로드 오류: {e}',
+    'msg.sampleMissing': '샘플을 찾을 수 없습니다',
+    'msg.imgInfoMissing': '이미지 정보를 찾을 수 없습니다',
+    'msg.pageDirty': '현재 페이지의 편집 내용이 사라집니다. 페이지를 바꿀까요?',
+    'prog.html': 'HTML 생성 중...',
+    'prog.img': '이미지 처리 중...',
+    'prog.saving': '파일 저장 중...',
+    'prog.done': '완료',
+    'prog.zipPack': '사이트 ZIP 재패킹 중...',
+    'prog.zipAssets': '이미지·자원 정리 중...',
+    'prog.zipBuild': 'ZIP 묶기...',
+    'prog.zipCompress': '압축 중...',
+    'prog.htmlRead': 'HTML 파일 읽는 중...',
+    'prog.previewMaking': '미리보기 생성 중...',
+    'prog.zipPrep': 'ZIP 준비 중...',
+    'prog.jszipLoad': 'JSZip 로드 중...',
+    'prog.shareGen': '공유 링크 생성 중...',
+    'prog.sample': '샘플 사이트 준비 중...',
+    'prog.zipUnpack': 'ZIP 파일 풀기...',
+    'prog.folderLoad': '폴더 파일 로드...',
+    'msg.imgCountChip': '{n}개 이미지',
+    'st.willResize': '✓ 크기 변경 예정',
+    'st.willResizeBox': '✓ 컨테이너 높이 변경 예정',
+    'st.edited': '수정됨',
+    'st.willDelete': '삭제 예정',
+    'st.willReplace': '교체 예정',
+    'st.restore': '복원',
+    'crop.title.num': '이미지 교체 — #{n}',
+    'msg.restored': '복구 완료',
+  },
+  en: {
+    // Header
+    'hdr.reset': 'Reset',
+    'hdr.addEl': '+ Add banner',
+    'hdr.share': 'Share link',
+    'hdr.zip': 'ZIP',
+    'hdr.download': 'Download',
+    'hdr.deploy': 'Deploy guide',
+    // Sidebar
+    'side.load': 'Load',
+    'side.mode.html': 'HTML',
+    'side.mode.zip': 'ZIP',
+    'side.mode.folder': 'Folder',
+    'side.zone.html.title': 'Upload HTML file',
+    'side.zone.html.hint': 'Single HTML file. No external CSS or images.',
+    'side.zone.zip.title': 'Upload site ZIP',
+    'side.zone.zip.hint': 'Whole site (HTML + CSS + images) zipped from a folder.',
+    'side.zone.folder.title': 'Pick a folder',
+    'side.zone.folder.hint': 'Folder picker (Chrome / Edge). HTML + CSS + images at once.',
+    'side.pagePicker': 'Page',
+    'side.status': 'Status',
+    'side.stat.total': 'Total images',
+    'side.stat.changed': 'Changed',
+    'side.stat.deleted': 'Deleted',
+    'side.stat.replaced': 'Replaced',
+    'side.changes': 'Changes',
+    'side.changes.empty': 'No changes yet',
+    // Empty screen
+    'empty.eyebrow': 'SUNNY EDITOR · Free · No signup',
+    'empty.headline.l1': 'Edit images and text',
+    'empty.headline.l2.pre': 'in a ',
+    'empty.headline.l2.em': 'finished HTML page',
+    'empty.headline.l2.post': '',
+    'empty.headline.l3': '— no code.',
+    'empty.desc.html': 'Drop an HTML file in the sidebar.<br>Every image and text node is auto-detected.',
+    'empty.desc.zip': 'Drop a zipped site folder (HTML + CSS + images).<br>External CSS and assets are all editable.',
+    'empty.desc.folder': 'Pick a whole folder (Chrome · Edge).<br>HTML, CSS, and images are detected automatically.',
+    'empty.wf.1.t': 'Upload',
+    'empty.wf.1.d': 'HTML · ZIP · Folder',
+    'empty.wf.2.t': 'Edit',
+    'empty.wf.2.d': 'One card at a time',
+    'empty.wf.3.t': 'Download',
+    'empty.wf.3.d': 'HTML or site ZIP',
+    'empty.btn.html': 'Pick HTML file',
+    'empty.btn.zip': 'Pick ZIP file',
+    'empty.btn.folder': 'Pick folder',
+    'empty.btn.sample': 'Try sample',
+    'empty.btn.guide': 'User guide →',
+    'empty.title.html': 'Upload an HTML file',
+    'empty.title.zip': 'Upload a site ZIP',
+    'empty.title.folder': 'Select a site folder',
+    // Tabs
+    'tab.image': 'Images',
+    'tab.text': 'Text',
+    'tab.preview': 'Preview',
+    // Filters
+    'filter.label': 'Filter',
+    'filter.all': 'All',
+    'filter.normal': 'Unchanged',
+    'filter.replaced': 'Replaced',
+    'filter.deleted': 'Deleted',
+    'filter.heading': 'Headings',
+    'filter.body': 'Body',
+    'filter.edited': 'Edited',
+    'preview.toolbar.note': 'Live preview with edits applied',
+    'preview.refresh': 'Refresh',
+    // Card actions
+    'card.replace': 'Replace',
+    'card.size': 'Size',
+    'card.delete': 'Delete',
+    'card.restoreDel': 'Cancel',
+    'card.replaceNeeded': 'Replace needed',
+    'card.sizeAuto': 'Auto size',
+    'card.deleted': 'Deleted',
+    'card.replaced': 'Replaced',
+    'card.externalUrl': 'External URL',
+    // Crop modal
+    'crop.title': 'Replace image',
+    'crop.sub': 'Upload a new image and adjust the crop and position',
+    'crop.upload': 'Upload image',
+    'crop.upload.hint': 'Click or drag · PNG, JPG, WEBP',
+    'crop.ratio': 'Ratio',
+    'crop.align': 'Align',
+    'crop.ratio.free': 'Free',
+    'crop.align.center': '⊞ Center',
+    'crop.align.top': '⬆ Top',
+    'crop.align.bottom': 'Bottom',
+    'crop.align.left': '⬅ Left',
+    'crop.align.right': '➡ Right',
+    'crop.align.full': 'Full',
+    'crop.preview': 'Preview',
+    'crop.preview.wide': 'Wide',
+    'crop.preview.sq': 'Square',
+    'crop.preview.orig': 'Original',
+    'crop.cancel': 'Cancel',
+    'crop.skip': 'Use original',
+    'crop.apply': 'Apply',
+    // Share modal
+    'share.title': 'Create share link',
+    'share.sub': 'Choose how to share the edited HTML',
+    'share.opt.url.t': 'Generate share URL',
+    'share.opt.url.d': 'One click · public URL · free',
+    'share.opt.file.t': 'Download and share file',
+    'share.opt.file.d': 'Save and share via Drive, Slack, etc.',
+    'share.close': 'Close',
+    'share.generate': 'Generate',
+    // Add element modal
+    'ae.title': 'Add banner',
+    'ae.tab.popup': 'Popup banner',
+    'ae.tab.cookie': 'Cookie consent',
+    'ae.popup.size': 'Popup image size',
+    'ae.popup.w': 'Width (px)',
+    'ae.popup.h': 'Height (px)',
+    'ae.popup.link': 'Click link (optional)',
+    'ae.popup.link.ph': 'https://... or leave blank for no link',
+    'ae.popup.maxw': 'Popup max width',
+    'ae.popup.timing': 'Show timing',
+    'ae.popup.today': 'Include "Hide today" button',
+    'ae.popup.bgclose': 'Close on backdrop click',
+    'ae.preview': 'Preview',
+    'ae.cookie.text': 'Cookie notice text',
+    'ae.cookie.accept': 'Accept button',
+    'ae.cookie.decline': 'Decline button',
+    'ae.cookie.pos': 'Position',
+    'ae.cookie.bg': 'Background color',
+    'ae.cookie.btnc': 'Button color',
+    'ae.add': 'Add to HTML',
+    // Deploy modal
+    'deploy.title': 'Deploy to your domain',
+    'deploy.s1.h': 'STEP 1 — Download the edited file',
+    'deploy.s1.b': 'Click the Download button at the top to save the edited HTML.',
+    'deploy.s2.h': 'STEP 2 — Upload to your host',
+    'deploy.s2.b': 'Connect to your hosting provider via FTP or file manager. Rename the downloaded file to <code>index.html</code> and upload.',
+    'deploy.s3.h': 'STEP 3 — Verify your domain',
+    'deploy.s3.b': 'Visit your domain (e.g. www.example.com) and check that the edited page loads correctly.',
+    'deploy.note.h': 'NOTE — Free hosting',
+    'deploy.note.b': '<b>GitHub Pages</b> (free)<br>1. Sign up at <a href="https://github.com" target="_blank">github.com</a> → create a new repository<br>2. Upload the downloaded file as <code>index.html</code><br>3. Settings → Pages → Branch: main → Save<br>4. Visit <code>username.github.io/repo-name</code> in a few minutes<br><br><b>Custom domain</b><br>Enter your domain in Pages settings → add a CNAME record at your DNS provider pointing to <code>username.github.io</code>.',
+    'deploy.help.h': 'HELP',
+    'deploy.help.b': 'If deployment is hard, send the edited HTML to an admin and we can deploy it for you.',
+    // Footer
+    'footer.copy': '© 2026 SUNNY ENTERTAINMENT INC. All rights reserved.',
+    // Dynamic messages
+    'msg.htmlOnly': 'Only HTML, ZIP, or folder is supported',
+    'msg.imgLoaded': '{n} images loaded',
+    'msg.imgReplaced': 'Image replaced',
+    'msg.noChanges': 'No changes to save',
+    'msg.downloaded': 'Download complete',
+    'msg.zipDone': 'Site ZIP downloaded',
+    'msg.addOk': 'Added. Replace the popup image in the Images tab.',
+    'msg.zipOk': 'ZIP done — original, edited HTML, images, text doc',
+    'msg.zipOkNoEdit': 'ZIP done — original HTML, images, text doc',
+    'msg.shareOk': 'Share link ready. Send the URL via Slack, email, etc.',
+    'msg.zipErr': 'ZIP error: {e}',
+    'msg.folderErr': 'Folder error: {e}',
+    'msg.noHtml': 'No HTML file found',
+    'msg.sampleErr': 'Sample load error: {e}',
+    'msg.sampleMissing': 'Sample not found',
+    'msg.imgInfoMissing': 'Image info missing',
+    'msg.pageDirty': 'Your edits on this page will be lost. Switch page?',
+    'prog.html': 'Building HTML...',
+    'prog.img': 'Processing images...',
+    'prog.saving': 'Saving file...',
+    'prog.done': 'Done',
+    'prog.zipPack': 'Re-packing site ZIP...',
+    'prog.zipAssets': 'Organizing assets...',
+    'prog.zipBuild': 'Building ZIP...',
+    'prog.zipCompress': 'Compressing...',
+    'prog.htmlRead': 'Reading HTML file...',
+    'prog.previewMaking': 'Building preview...',
+    'prog.zipPrep': 'Preparing ZIP...',
+    'prog.jszipLoad': 'Loading JSZip...',
+    'prog.shareGen': 'Generating share link...',
+    'prog.sample': 'Preparing sample site...',
+    'prog.zipUnpack': 'Unpacking ZIP...',
+    'prog.folderLoad': 'Loading folder files...',
+    'msg.imgCountChip': '{n} images',
+    'st.willResize': '✓ Resize pending',
+    'st.willResizeBox': '✓ Container height pending',
+    'st.edited': 'Edited',
+    'st.willDelete': 'Delete pending',
+    'st.willReplace': 'Replace pending',
+    'st.restore': 'Restore',
+    'crop.title.num': 'Replace image — #{n}',
+    'msg.restored': 'Restored',
+  },
+};
+
+let currentLang = 'ko';
+
+function detectLang() {
+  try {
+    const stored = localStorage.getItem('swe.lang');
+    if (stored === 'ko' || stored === 'en') return stored;
+  } catch (e) {}
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+}
+
+function t(key, vars) {
+  const dict = I18N[currentLang] || I18N.ko;
+  let s = dict[key];
+  if (s == null) s = I18N.ko[key] || key;
+  if (vars && typeof s === 'string') {
+    s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : `{${k}}`));
+  }
+  return s;
+}
+
+function setLang(lang) {
+  if (lang !== 'ko' && lang !== 'en') return;
+  currentLang = lang;
+  try { localStorage.setItem('swe.lang', lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  applyI18n();
+  // 모드별 안내 + change-list 다시 그리기 (i18n 영향 받음)
+  if (typeof switchUploadMode === 'function' && typeof uploadMode !== 'undefined') {
+    switchUploadMode(uploadMode);
+  }
+  if (typeof syncChangeList === 'function') {
+    try { syncChangeList(); } catch (e) {}
+  }
+  if (typeof renderTextList === 'function' && typeof textNodes !== 'undefined' && textNodes && textNodes.length) {
+    try { renderTextList(); renderGrid(); } catch (e) {}
+  }
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+}
+
 // ════════════════════════════════════
 //  상태
 // ════════════════════════════════════
@@ -1451,19 +2169,452 @@ let imgOffset = { x:0, y:0, w:0, h:0 }; // 캔버스 내 이미지 실제 위치
 // ════════════════════════════════════
 //  HTML 파일 로드
 // ════════════════════════════════════
+// ════════════════════════════════════
+//  업로드 모드 (V1.1)
+//   - html  = 단일 HTML 1개
+//   - zip   = ZIP 통째 (HTML + CSS + 이미지)
+//   - folder= 폴더 통째 (webkitdirectory, Chrome/Edge만)
+// ════════════════════════════════════
+let uploadMode = 'html';
+let siteBundle = null;  // { files: Map<path,Blob>, htmlPath, blobUrls: Map<path,objectURL> }
+
+function switchUploadMode(mode) {
+  uploadMode = mode;
+  document.querySelectorAll('.um-tab').forEach(b => b.classList.remove('active'));
+  const tab = document.getElementById('um-tab-' + mode);
+  if (tab) tab.classList.add('active');
+
+  // 사이드바 dropzone 안내 (= i18n key 매핑)
+  const zoneTitle = document.getElementById('um-zone-title');
+  const zoneHint = document.getElementById('um-zone-hint');
+  if (zoneTitle) { zoneTitle.setAttribute('data-i18n', 'side.zone.' + mode + '.title'); zoneTitle.textContent = t('side.zone.' + mode + '.title'); }
+  if (zoneHint) { zoneHint.setAttribute('data-i18n', 'side.zone.' + mode + '.hint'); zoneHint.textContent = t('side.zone.' + mode + '.hint'); }
+
+  // 빈 화면 (콘텐츠 영역) 안내 + 버튼도 모드에 맞춰 갱신
+  const ed = document.getElementById('empty-desc');
+  const eb = document.getElementById('empty-btn');
+  if (ed) { ed.setAttribute('data-i18n-html', 'empty.desc.' + mode); ed.innerHTML = t('empty.desc.' + mode); }
+  if (eb) { eb.setAttribute('data-i18n', 'empty.btn.' + mode); eb.textContent = t('empty.btn.' + mode); }
+}
+function triggerActiveUpload() {
+  const m = uploadMode;
+  if (m === 'html') document.getElementById('file-html-inp').click();
+  else if (m === 'zip') document.getElementById('file-zip-inp').click();
+  else if (m === 'folder') document.getElementById('file-folder-inp').click();
+}
+
 function onFileDragOver(e) { e.preventDefault(); document.getElementById('file-dropzone').classList.add('drag-over'); }
 function onFileDragLeave() { document.getElementById('file-dropzone').classList.remove('drag-over'); }
 function onFileDrop(e) {
   e.preventDefault();
   document.getElementById('file-dropzone').classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f && (f.name.endsWith('.html') || f.name.endsWith('.htm'))) processHtmlFile(f);
-  else toast('⚠ HTML 파일만 지원해요');
+  const dt = e.dataTransfer;
+  const files = [...(dt.files || [])];
+  // 폴더 드롭 지원 (DataTransferItemList)
+  if (dt.items && dt.items.length && [...dt.items].some(it => it.webkitGetAsEntry && it.webkitGetAsEntry()?.isDirectory)) {
+    return collectDroppedDirectory(dt.items).then(fileList => {
+      if (fileList.length) { switchUploadMode('folder'); processFolderFiles(fileList); }
+    });
+  }
+  if (!files.length) return;
+  const f = files[0];
+  const nm = (f.name || '').toLowerCase();
+  if (files.length > 1) {
+    switchUploadMode('folder');
+    processFolderFiles(files);
+  } else if (nm.endsWith('.zip')) {
+    switchUploadMode('zip');
+    processZipFile(f);
+  } else if (nm.endsWith('.html') || nm.endsWith('.htm')) {
+    switchUploadMode('html');
+    processHtmlFile(f);
+  } else {
+    toast(t('msg.htmlOnly'));
+  }
 }
 function loadHtmlFile(e) {
   const f = e.target.files[0];
   if (f) processHtmlFile(f);
   e.target.value = '';
+}
+function loadZipFile(e) {
+  const f = e.target.files[0];
+  if (f) processZipFile(f);
+  e.target.value = '';
+}
+function loadFolderFiles(e) {
+  const files = [...e.target.files];
+  if (files.length) processFolderFiles(files);
+  e.target.value = '';
+}
+
+// 샘플 사이트 즉시 체험 (= bakery / portfolio)
+const SAMPLE_MANIFEST = {
+  bakery: ['index.html','style.css','images/logo.svg','images/hero.svg','images/bread-1.svg','images/bread-2.svg','images/bread-3.svg'],
+  portfolio: ['index.html','about.html','contact.html','style.css','images/work-1.svg','images/work-2.svg','images/work-3.svg','images/work-4.svg','images/work-5.svg','images/work-6.svg','images/portrait.svg'],
+};
+async function loadSample(which) {
+  const list = SAMPLE_MANIFEST[which];
+  if (!list) { toast(t('msg.sampleMissing')); return; }
+  try {
+    showProg(t('prog.sample'), 10); await tick();
+    await ensureJSZip();
+    const zip = new JSZip();
+    let i = 0;
+    for (const rel of list) {
+      const r = await fetch(`./samples/${which}/${rel}`);
+      if (!r.ok) throw new Error(`샘플 파일 누락: ${rel}`);
+      const blob = await r.blob();
+      zip.file(rel, blob);
+      i++;
+      setProg(`샘플 파일 로드 ${i}/${list.length}`, 10 + (i/list.length)*30);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const file = new File([zipBlob], `${which}.zip`, { type: 'application/zip' });
+    switchUploadMode('zip');
+    await processZipFile(file);
+  } catch (e) {
+    hideProg();
+    toast(t('msg.sampleErr', {e: e.message}));
+  }
+}
+
+// drop된 폴더에서 모든 파일 모으기
+async function collectDroppedDirectory(items) {
+  const out = [];
+  const tasks = [];
+  for (const it of items) {
+    const entry = it.webkitGetAsEntry && it.webkitGetAsEntry();
+    if (!entry) continue;
+    tasks.push(walkEntry(entry, '', out));
+  }
+  await Promise.all(tasks);
+  return out;
+}
+function walkEntry(entry, prefix, out) {
+  return new Promise(res => {
+    if (entry.isFile) {
+      entry.file(f => {
+        try { Object.defineProperty(f, 'webkitRelativePath', { value: prefix + entry.name }); } catch (e) {}
+        out.push(f);
+        res();
+      }, () => res());
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const readBatch = () => reader.readEntries(async ents => {
+        if (!ents.length) return res();
+        await Promise.all(ents.map(e2 => walkEntry(e2, prefix + entry.name + '/', out)));
+        readBatch();
+      });
+      readBatch();
+    } else { res(); }
+  });
+}
+
+// ════════════════════════════════════
+//  사이트 번들 처리 (ZIP / 폴더 공통)
+// ════════════════════════════════════
+async function ensureJSZip() {
+  if (window.JSZip) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = res;
+    s.onerror = () => rej(new Error('JSZip 로드 실패. 인터넷 연결 확인'));
+    document.head.appendChild(s);
+  });
+}
+
+async function processZipFile(file) {
+  try {
+    showProg(t('prog.zipUnpack'), 8);
+    await ensureJSZip();
+    const ab = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(ab);
+    const rawFiles = new Map();
+    let total = 0;
+    const allPaths = [];
+    zip.forEach((p, entry) => {
+      if (entry.dir) return;
+      // macOS·Windows·Linux ZIP에 자동 박히는 메타 파일 무시
+      if (p.startsWith('__MACOSX/') || p.endsWith('/.DS_Store') || p === '.DS_Store' || p.endsWith('/Thumbs.db') || p === 'Thumbs.db') return;
+      allPaths.push(p);
+    });
+    for (const path of allPaths) {
+      const entry = zip.file(path);
+      if (!entry) continue;
+      const blob = await entry.async('blob');
+      rawFiles.set(path, blob);
+      total++;
+      if (total % 10 === 0) setProg(`ZIP 풀기 ${total}/${allPaths.length}`, 8 + (total/allPaths.length)*22);
+    }
+    // ★ root prefix 자동 감지·제거 (= 모든 path가 같은 1단 폴더로 시작하면 벗김)
+    const files = stripCommonPrefix(rawFiles);
+    let bundleName = file.name.replace(/\.zip$/i, '');
+    if (files !== rawFiles) {
+      // prefix를 벗긴 경우 = 그 prefix를 번들 이름으로
+      const firstRaw = rawFiles.keys().next().value;
+      const prefix = firstRaw.split('/')[0];
+      if (prefix && prefix !== bundleName) bundleName = prefix;
+    }
+    await loadBundle({ name: bundleName, files });
+  } catch (e) {
+    hideProg();
+    toast(t('msg.zipErr', {e: e.message}));
+  }
+}
+
+// 모든 path가 동일한 1단 디렉터리 prefix로 시작하면 = 그것을 제거한 새 Map 반환.
+// 그렇지 않으면 원본 Map 그대로 반환.
+function stripCommonPrefix(filesMap) {
+  if (filesMap.size === 0) return filesMap;
+  const paths = [...filesMap.keys()];
+  // 첫 번째 path에서 1단 prefix 추출 ("dir/...")
+  const first = paths[0];
+  if (!first.includes('/')) return filesMap; // 루트에 파일이 있으면 prefix 없음
+  const prefix = first.substring(0, first.indexOf('/') + 1);
+  // 모든 path가 같은 prefix로 시작하는지 확인
+  if (!paths.every(p => p.startsWith(prefix))) return filesMap;
+  // 벗긴 새 Map
+  const out = new Map();
+  for (const [p, blob] of filesMap) {
+    out.set(p.substring(prefix.length), blob);
+  }
+  return out;
+}
+
+async function processFolderFiles(fileList) {
+  try {
+    showProg(t('prog.folderLoad'), 10);
+    const files = new Map();
+    let rootName = '';
+    for (const f of fileList) {
+      const rel = f.webkitRelativePath || f.name;
+      if (!rootName && rel.includes('/')) rootName = rel.split('/')[0];
+      // root prefix 제거 (zip 일관성)
+      const normalized = rootName && rel.startsWith(rootName + '/') ? rel.substring(rootName.length + 1) : rel;
+      files.set(normalized, f);
+    }
+    await loadBundle({ name: rootName || 'folder', files });
+  } catch (e) {
+    hideProg();
+    toast(t('msg.folderErr', {e: e.message}));
+  }
+}
+
+async function loadBundle(bundle) {
+  // HTML 파일 찾기
+  const htmlPaths = [...bundle.files.keys()].filter(p => /\.(html?|htm)$/i.test(p));
+  if (!htmlPaths.length) { hideProg(); toast(t('msg.noHtml')); return; }
+  // 우선순위: 루트 index.html > index.html > 첫 html
+  let mainHtml = htmlPaths.find(p => p === 'index.html' || p === 'index.htm');
+  if (!mainHtml) mainHtml = htmlPaths.find(p => /^[^\/]+\.html?$/i.test(p) && /index/i.test(p));
+  if (!mainHtml) mainHtml = htmlPaths.sort((a,b)=>a.split('/').length - b.split('/').length)[0];
+
+  // 이미지·CSS blob URL 생성
+  const blobUrls = new Map();
+  for (const [p, blob] of bundle.files) {
+    if (!/\.(html?|htm|css)$/i.test(p)) {
+      const mime = guessMime(p);
+      const typed = blob.type ? blob : new Blob([blob], { type: mime });
+      blobUrls.set(p, URL.createObjectURL(typed));
+    }
+  }
+
+  siteBundle = {
+    name: bundle.name,
+    files: bundle.files,
+    htmlPath: mainHtml,
+    blobUrls,
+    htmlPaths,
+    // 페이지별 작업 상태 캐시 (페이지 전환 시 보존)
+    pageStates: {}
+  };
+
+  // 다중 HTML 페이지 셀렉터
+  const picker = document.getElementById('page-picker');
+  const sel = document.getElementById('page-select');
+  if (htmlPaths.length > 1) {
+    sel.innerHTML = htmlPaths.map(p => `<option value="${p}"${p===mainHtml?' selected':''}>${p}</option>`).join('');
+    picker.style.display = 'block';
+  } else {
+    picker.style.display = 'none';
+  }
+
+  // 모드 칩 표시
+  const chip = document.getElementById('file-mode-chip');
+  chip.style.display = 'inline-block';
+  chip.textContent = uploadMode === 'zip' ? 'ZIP' : 'FOLDER';
+
+  // 외부 CSS 미리 읽어 캐시 (inlineExternalAssets에서 동기 사용)
+  await preloadCssCache();
+
+  await loadBundlePage(mainHtml);
+}
+
+async function loadBundlePage(htmlPath) {
+  if (!siteBundle) return;
+  siteBundle.htmlPath = htmlPath;
+  const blob = siteBundle.files.get(htmlPath);
+  const htmlText = await blob.text();
+  const baseDir = htmlPath.includes('/') ? htmlPath.substring(0, htmlPath.lastIndexOf('/') + 1) : '';
+  const inlinedHtml = inlineExternalAssets(htmlText, baseDir);
+  const synth = new File([inlinedHtml], htmlPath.split('/').pop(), { type: 'text/html' });
+  await processHtmlFile(synth);
+}
+
+function inlineExternalAssets(htmlText, baseDir) {
+  // <link rel="stylesheet" href="X.css"> → <style>... CSS 내용 ...</style>
+  htmlText = htmlText.replace(/<link\s+[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi, (tag) => {
+    const m = tag.match(/href\s*=\s*["']([^"']+)["']/i);
+    if (!m) return tag;
+    if (/^(https?:|data:|\/\/)/i.test(m[1])) return tag; // 외부 CDN = 그대로
+    const cssPath = findBundlePath(baseDir, m[1]);
+    if (!cssPath) return tag;
+    const cssText = siteBundle.cssCache?.get(cssPath);
+    if (cssText == null) return tag;
+    return `<style data-from="${escAttr(cssPath)}" data-original-href="${escAttr(m[1])}">\n${cssText}\n</style>`;
+  });
+  // 이미지·기타 자원 src/href → blob URL
+  htmlText = htmlText.replace(/(src|href|data-src|srcset)\s*=\s*["']([^"']+)["']/gi, (full, attr, val) => {
+    if (/^(https?:|data:|\/\/|#|mailto:|tel:|javascript:|blob:)/i.test(val)) return full;
+    // srcset = "img1.png 1x, img2.png 2x" → 각 URL 따로 처리
+    if (attr.toLowerCase() === 'srcset' && val.includes(',')) {
+      const parts = val.split(',').map(p => p.trim());
+      const remapped = parts.map(part => {
+        const seg = part.split(/\s+/);
+        const u = seg[0];
+        if (/^(https?:|data:|\/\/|blob:)/i.test(u)) return part;
+        const found = findBundleBlobUrl(baseDir, u);
+        if (!found) return part;
+        seg[0] = found;
+        return seg.join(' ');
+      }).join(', ');
+      return `${attr}="${remapped}" data-original-src="${escAttr(val)}"`;
+    }
+    const url = findBundleBlobUrl(baseDir, val);
+    if (!url) return full;
+    return `${attr}="${url}" data-original-src="${escAttr(val)}"`;
+  });
+  // 인라인 <style> 안의 url(...) 처리
+  htmlText = htmlText.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (full, css) => {
+    const rewritten = rewriteCssUrls(css, baseDir);
+    if (rewritten === css) return full;
+    return full.replace(css, rewritten);
+  });
+  // 인라인 style="background: url(...)" 처리
+  htmlText = htmlText.replace(/\bstyle\s*=\s*"([^"]*\burl\s*\([^"]*)"/gi, (full, styleVal) => {
+    const rewritten = rewriteCssUrls(styleVal, baseDir);
+    if (rewritten === styleVal) return full;
+    return `style="${rewritten}"`;
+  });
+  return htmlText;
+}
+
+// CSS 안 url(...) 재작성 (blob URL로)
+function rewriteCssUrls(cssText, baseDir) {
+  return cssText.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (full, q, u) => {
+    if (/^(https?:|data:|\/\/|#|blob:)/i.test(u)) return full;
+    const found = findBundleBlobUrl(baseDir, u);
+    if (!found) return full;
+    return `url(${q}${found}${q})`;
+  });
+}
+
+// 번들 안에서 파일 경로 찾기 (다단계 fallback)
+function findBundlePath(baseDir, rel) {
+  if (!rel || !siteBundle) return null;
+  // 1. baseDir + rel resolve 그대로
+  const resolved = resolvePath(baseDir, rel);
+  if (siteBundle.files.has(resolved)) return resolved;
+  // 2. 절대처럼 시작하는 경우 leading / 벗기고 시도
+  const stripped = rel.replace(/^\/+/, '');
+  if (siteBundle.files.has(stripped)) return stripped;
+  // 3. URL/쿼리·해시 제거 후 재시도
+  const cleaned = stripped.split(/[?#]/)[0];
+  if (siteBundle.files.has(cleaned)) return cleaned;
+  // 4. 모든 번들 path 중 같은 suffix로 끝나는 것 찾기 (basename 또는 더 긴 suffix)
+  const target = cleaned.toLowerCase();
+  let best = null;
+  let bestLen = -1;
+  for (const p of siteBundle.files.keys()) {
+    const pl = p.toLowerCase();
+    if (pl === target || pl.endsWith('/' + target)) {
+      if (p.length > bestLen) { best = p; bestLen = p.length; }
+    }
+  }
+  if (best) return best;
+  // 5. 최후 = basename만 매칭
+  const basename = cleaned.split('/').pop().toLowerCase();
+  if (basename) {
+    for (const p of siteBundle.files.keys()) {
+      if (p.toLowerCase().endsWith('/' + basename) || p.toLowerCase() === basename) {
+        return p;
+      }
+    }
+  }
+  return null;
+}
+
+function findBundleBlobUrl(baseDir, rel) {
+  const path = findBundlePath(baseDir, rel);
+  if (!path) return null;
+  return siteBundle.blobUrls.get(path) || null;
+}
+
+function resolvePath(baseDir, rel) {
+  if (!rel) return rel;
+  if (rel.startsWith('/')) return rel.replace(/^\/+/, '');
+  // baseDir/rel 정규화 (../ ./ 처리)
+  const parts = (baseDir + rel).split('/');
+  const out = [];
+  for (const p of parts) {
+    if (p === '' || p === '.') continue;
+    if (p === '..') out.pop();
+    else out.push(p);
+  }
+  return out.join('/');
+}
+function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function guessMime(path) {
+  const ext = path.split('.').pop().toLowerCase();
+  return ({
+    png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif',
+    webp:'image/webp', svg:'image/svg+xml', avif:'image/avif', ico:'image/x-icon',
+    css:'text/css', js:'application/javascript', json:'application/json',
+    woff:'font/woff', woff2:'font/woff2', ttf:'font/ttf', otf:'font/otf',
+    mp4:'video/mp4', webm:'video/webm', mp3:'audio/mpeg',
+    pdf:'application/pdf', txt:'text/plain'
+  })[ext] || 'application/octet-stream';
+}
+
+async function switchPage(htmlPath) {
+  if (!siteBundle) return;
+  // 현재 페이지 작업 상태를 저장하고 다른 페이지로 전환할 때는 데이터 손실 경고
+  if (typeof images !== 'undefined' && images.length) {
+    const dirty = (typeof replaced !== 'undefined' && replaced.size) ||
+                  (typeof deleted !== 'undefined' && deleted.size) ||
+                  (typeof textEdits !== 'undefined' && textEdits.size) ||
+                  (typeof textDeleted !== 'undefined' && textDeleted.size);
+    if (dirty && !confirm(t('msg.pageDirty'))) {
+      // 셀렉터 원상복귀
+      document.getElementById('page-select').value = siteBundle.htmlPath;
+      return;
+    }
+  }
+  await loadBundlePage(htmlPath);
+}
+
+// CSS 캐시를 미리 읽는 헬퍼 (loadBundle에서 호출하도록 수정)
+async function preloadCssCache() {
+  if (!siteBundle) return;
+  siteBundle.cssCache = new Map();
+  for (const [p, blob] of siteBundle.files) {
+    if (/\.css$/i.test(p)) {
+      siteBundle.cssCache.set(p, await blob.text());
+    }
+  }
 }
 
 // ════════════════════════════════════
@@ -1481,7 +2632,7 @@ function onSizeInput(i) {
     note.textContent = '';
   } else {
     resized[i] = { w, h };
-    note.textContent = '✓ 크기 변경 예정';
+    note.textContent = t('st.willResize');
   }
   syncStats(); syncChangeList();
 }
@@ -1501,7 +2652,7 @@ function onParentHeightInput(i) {
     note.textContent = '';
   } else {
     parentResized[i] = val;
-    note.textContent = '✓ 컨테이너 높이 변경 예정';
+    note.textContent = t('st.willResizeBox');
   }
   syncStats(); syncChangeList();
 }
@@ -1536,7 +2687,7 @@ function switchTab(tab) {
 // ════════════════════════════════════
 async function refreshPreview() {
   const iframe = document.getElementById('preview-iframe');
-  showProg('미리보기 생성 중...', 40);
+  showProg(t('prog.previewMaking'), 40);
   await tick();
   try {
     const html = await buildHtml();
@@ -1624,7 +2775,7 @@ function renderTextList() {
         <span class="txt-card-path">${preview}</span>
         <div class="txt-card-actions">
           <button class="txt-action" onclick="toggleOriginal(${i})">원본 보기</button>
-          <button class="txt-action danger" id="tdelbtn-${i}" onclick="toggleTxtDelete(${i})">🗑 삭제</button>
+          <button class="txt-action danger" id="tdelbtn-${i}" onclick="toggleTxtDelete(${i})">삭제</button>
         </div>
       </div>
       <div class="txt-card-body">
@@ -1653,7 +2804,7 @@ function onTxtInput(i) {
   } else {
     txtEdited[i] = val;
     card.classList.add('txt-edited');
-    st.textContent = '수정됨'; st.className = 'txt-status edited';
+    st.textContent = t('st.edited'); st.className = 'txt-status edited';
   }
   syncStats(); syncChangeList();
 }
@@ -1667,7 +2818,7 @@ function toggleTxtDelete(i) {
     txtDeleted.delete(i);
     card.classList.remove('txt-deleted');
     inp.classList.remove('deleted-input');
-    btn.textContent = '🗑 삭제'; btn.classList.remove('restore');
+    btn.textContent = t('card.delete'); btn.classList.remove('restore');
     st.textContent = txtEdited[i] !== undefined ? '수정됨' : '';
     st.className = 'txt-status' + (txtEdited[i] !== undefined ? ' edited' : '');
   } else {
@@ -1675,8 +2826,8 @@ function toggleTxtDelete(i) {
     delete txtEdited[i];
     card.classList.add('txt-deleted'); card.classList.remove('txt-edited');
     inp.classList.add('deleted-input');
-    btn.textContent = '↩ 복원'; btn.classList.add('restore');
-    st.textContent = '삭제 예정'; st.className = 'txt-status deleted';
+    btn.textContent = t('st.restore'); btn.classList.add('restore');
+    st.textContent = t('st.willDelete'); st.className = 'txt-status deleted';
   }
   syncStats(); syncChangeList();
 }
@@ -1707,14 +2858,15 @@ function applyTxtFilter() {
 }
 
 async function processHtmlFile(file) {
-  showProg('HTML 파일 읽는 중...', 10);
+  showProg(t('prog.htmlRead'), 10);
   await tick();
   const text = await file.text();
   currentFileName = file.name;
 
-  // ── 마커 방식: base64 + 외부URL + 로컬 상대경로 이미지 모두 인식 ──
-  // 확장자 있는 이미지 + 확장자 없는 외부 URL(unsplash 등) 모두 감지
-  const regex = /src="(data:image[^"]+|https?:\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^"]*)?|\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^"]*)?|https?:\/\/[^"]+|(?:\.\/|\.\.\/|[^/"':=\s][^"']*?)\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^"]*)?)"/gi;
+  // ── 마커 방식: base64 + blob + 외부URL + 로컬 상대경로 이미지 모두 인식 ──
+  // (?<![-\w]) = data-original-src= 같은 다른 속성에 끼어들지 않도록 src 앞 경계 확인
+  // blob: = ZIP/폴더 모드 인라인 자원 (V1.1)
+  const regex = /(?<![-\w])src="(blob:[^"]+|data:image[^"]+|https?:\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp|svg|avif)(?:\?[^"]*)?|\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp|svg|avif)(?:\?[^"]*)?|https?:\/\/[^"]+|(?:\.\/|\.\.\/|[^/"':=\s][^"']*?)\.(?:jpg|jpeg|png|gif|webp|svg|avif)(?:\?[^"]*)?)"/gi;
   let m, found = [];
   let templateHtml = text;
 
@@ -1736,6 +2888,7 @@ async function processHtmlFile(file) {
     const styleM = imgTagFull.match(/\bstyle=["']([^"']+)["']/i);
     const styleW = styleM ? styleM[1].match(/width\s*:\s*([^;]+)/i) : null;
     const styleH = styleM ? styleM[1].match(/height\s*:\s*([^;]+)/i) : null;
+    const origSrcM = imgTagFull.match(/\bdata-original-src=["']([^"']+)["']/i);
     const before500 = text.slice(Math.max(0, imgTagStart - 500), imgTagStart);
     const parentDivM = before500.match(/(<(?:div|figure|section)[^>]*style=["']([^"']*height\s*:\s*[\w%.]+[^"']*)["'][^>]*>)\s*$/);
     let parentHeight = null, parentTagOffset = null;
@@ -1753,6 +2906,7 @@ async function processHtmlFile(file) {
       attrW: wM ? wM[1] : null, attrH: hM ? hM[1] : null,
       styleW: styleW ? styleW[1].trim() : null, styleH: styleH ? styleH[1].trim() : null,
       parentHeight, parentTagOffset, isBg: false,
+      originalSrc: origSrcM ? origSrcM[1] : null,
     });
   }
 
@@ -1832,6 +2986,7 @@ async function processHtmlFile(file) {
     imgTagEnd: match.imgTagEnd,
     parentHeight: match.parentHeight,
     parentTagOffset: match.parentTagOffset,
+    originalSrc: match.originalSrc || null,
   }));
   images = found;
 
@@ -1856,7 +3011,7 @@ async function processHtmlFile(file) {
   document.getElementById('file-info').classList.add('show');
   document.getElementById('file-name-display').textContent = file.name;
   document.getElementById('file-size-display').textContent = (text.length/1024/1024).toFixed(1) + 'MB';
-  document.getElementById('file-img-count').textContent = images.length + '개 이미지';
+  document.getElementById('file-img-count').textContent = t('msg.imgCountChip', {n: images.length});
   document.getElementById('empty-screen').style.display = 'none';
   const ea = document.getElementById('editor-area');
   ea.style.display = 'flex';
@@ -1872,7 +3027,7 @@ async function processHtmlFile(file) {
   document.getElementById('btn-deploy-guide').disabled = false;
   syncStats();
   hideProg();
-  toast(`✅ 이미지 ${images.length}개 로드 완료`);
+  toast(t('msg.imgLoaded', {n: images.length}));
 }
 
 async function renderGrid() {
@@ -1882,19 +3037,22 @@ async function renderGrid() {
 
   for (let i = 0; i < images.length; i++) {
     const img = images[i];
-    const isUrl = img.src.startsWith('http') || img.src.startsWith('//');
-    const isLocal = !img.src.startsWith('data:') && !isUrl; // 로컬 상대경로
+    const isHttp = img.src.startsWith('http') || img.src.startsWith('//');
+    const isBlob = img.src.startsWith('blob:');
+    const isData = img.src.startsWith('data:');
+    const isUrl = isHttp || isBlob;
+    const isLocal = !isData && !isUrl; // 로컬 상대경로 (번들 파일 매칭 실패)
     img.isUrl = isUrl;
     img.isLocal = isLocal;
+    img.isBlob = isBlob;
 
     let thumb;
     if (isUrl) {
-      thumb = img.src; // 외부URL: 직접 사용
+      thumb = img.src; // http/blob: 직접 사용 (블롭은 ZIP/폴더 모드 자원)
     } else if (isLocal) {
-      // 로컬 경로: 파일 없으니 placeholder 이미지
       thumb = ''; // 빈 상태 → 카드에서 경로명 표시
     } else {
-      thumb = await makeThumb(img.src); // base64: 리사이즈
+      thumb = await makeThumb(img.src); // data: → 리사이즈
     }
     img.thumb = thumb;
 
@@ -1911,15 +3069,14 @@ async function renderGrid() {
     div.innerHTML = `
       <img class="card-thumb" id="thumb-${i}" src="${thumb}" data-orig="${thumb}" alt=""
         style="${isLocal && !thumb ? 'display:none' : ''}">
-      ${isLocal && !thumb ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1e1e2e;padding:8px;gap:4px;">
-        <div style="font-size:18px;">🖼</div>
-        <div style="font-size:9px;color:#888;text-align:center;word-break:break-all;line-height:1.4;">${img.src}</div>
-        <div style="font-size:9px;color:#f0a500;font-weight:700;">교체 필요</div>
+      ${isLocal && !thumb ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface2);padding:8px;gap:4px;">
+        <div style="font-size:10px;color:var(--text3);text-align:center;word-break:break-all;line-height:1.4;font-family:var(--font-mono);">${img.src}</div>
+        <div style="font-size:10px;color:var(--accent);font-weight:600;font-family:var(--font-mono);">교체 필요</div>
       </div>` : ''}
       <div class="card-overlay">
-        <button class="card-action ca-replace" onclick="openCrop(${i})">🔄 교체</button>
-        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})">📐 크기</button>
-        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})">🗑 삭제</button>
+        <button class="card-action ca-replace" onclick="openCrop(${i})">교체</button>
+        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})">크기</button>
+        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})">삭제</button>
       </div>
       <div class="card-badge badge-del">삭제됨</div>
       <div class="card-badge badge-rep">교체됨</div>
@@ -1927,13 +3084,13 @@ async function renderGrid() {
       <div class="card-info">
         <div class="card-name" title="${img.name}">${img.name}</div>
         <div class="card-meta">
-          <span>${isUrl ? '🔗 외부URL' : isLocal ? '📁 ' + img.src.split('/').pop() : (img.src.length/1024).toFixed(0)+'KB'}</span>
-          <span style="color:var(--text2);">${sizeHint}</span>
+          <span>${img.originalSrc ? img.originalSrc.split('/').pop() : isHttp ? '외부 URL' : isBlob ? '번들 자원' : isLocal ? img.src.split('/').pop() : (img.src.length/1024).toFixed(0)+' KB'}</span>
+          <span style="color:var(--text3);">· ${sizeHint}</span>
         </div>
         <div class="size-edit-panel" id="szpanel-${i}" style="display:none;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <span style="font-size:11px;font-weight:700;color:var(--accent4);">📐 HTML 원본 크기 수정</span>
-            <button onclick="toggleSizeEdit(${i})" style="border:none;background:none;color:var(--text2);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;">✕</button>
+            <span style="font-size:10px;font-weight:600;color:var(--text2);font-family:var(--font-mono);letter-spacing:0.04em;">HTML 원본 크기 수정</span>
+            <button onclick="toggleSizeEdit(${i})" style="border:none;background:none;color:var(--text2);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;">×</button>
           </div>
           <div class="size-edit-inputs">
             <div class="size-field">
@@ -2000,12 +3157,12 @@ function toggleDelete(i) {
   if (deleted.has(i)) {
     deleted.delete(i);
     card.classList.remove('deleted');
-    btn.textContent = '🗑 삭제'; st.textContent = '';
+    btn.textContent = t('card.delete'); st.textContent = '';
   } else {
     if (replaced[i]) { delete replaced[i]; card.classList.remove('replaced'); }
     deleted.add(i);
     card.classList.add('deleted');
-    btn.textContent = '↩ 취소'; st.textContent = '삭제 예정';
+    btn.textContent = t('card.restoreDel'); st.textContent = t('st.willDelete');
   }
   syncStats(); syncChangeList(); applyFilter();
 }
@@ -2014,18 +3171,23 @@ function toggleDelete(i) {
 //  크롭 모달
 // ════════════════════════════════════
 function openCrop(i) {
+  if (!images || !images[i]) { toast(t('msg.imgInfoMissing')); return; }
   currentEditIdx = i;
   pendingDataUrl = null;
   cropImg = null;
-  document.getElementById('crop-modal-title').textContent = `🔄 이미지 교체 — #${i+1}`;
+  document.getElementById('crop-modal-title').textContent = t('crop.title.num', {n: i+1});
   document.getElementById('upload-zone').style.display = 'flex';
   document.getElementById('crop-editor').classList.remove('show');
   document.getElementById('btn-apply-crop').disabled = true;
-  document.getElementById('btn-skip-crop').disabled = true;
+  const skipBtn = document.getElementById('btn-skip-crop');
+  if (skipBtn) skipBtn.disabled = true;
   document.getElementById('file-img-inp').value = '';
-  // 미리보기 초기화
+  // 미리보기 초기화 — 기존 thumb이 있으면 표시, 없으면 빈 영역
+  const safeThumb = images[i].thumb || '';
   ['preview-wide','preview-sq','preview-orig'].forEach(id => {
-    document.getElementById(id).src = images[i].thumb;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (safeThumb) el.src = safeThumb; else el.removeAttribute('src');
   });
   document.getElementById('crop-modal-bg').classList.add('open');
 }
@@ -2312,10 +3474,10 @@ function applyImageToSlot(dataUrl) {
   const card = document.getElementById('card-' + i);
   card.classList.remove('deleted'); card.classList.add('replaced');
   document.getElementById('thumb-' + i).src = dataUrl;
-  document.getElementById('delbtn-' + i).textContent = '🗑 삭제';
-  document.getElementById('cst-' + i).textContent = '교체 예정';
+  document.getElementById('delbtn-' + i).textContent = t('card.delete');
+  document.getElementById('cst-' + i).textContent = t('st.willReplace');
   syncStats(); syncChangeList(); applyFilter();
-  toast('✅ 이미지 교체 완료');
+  toast(t('msg.imgReplaced'));
 }
 
 // ════════════════════════════════════
@@ -2358,7 +3520,7 @@ function aeUpdatePreview() {
       '<div style="position:relative;background:rgba(0,0,0,.75);border-radius:8px;padding:16px;text-align:center;">'
       + '<div style="font-size:10px;color:#aaa;margin-bottom:8px;">미리보기 (실제 크기: '+imgW+'×'+imgH+'px, 최대너비: '+maxW+')</div>'
       + '<div style="background:linear-gradient(135deg,#2a2a3e,#1a1a2e);border-radius:8px;width:260px;height:'+previewH+'px;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">'
-      + '<div style="color:#555;font-size:12px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">🖼</div>여기에 팝업 이미지<br>'+imgW+'×'+imgH+'px</div>'
+      + '<div style="color:#555;font-size:12px;text-align:center;font-family:Pretendard,sans-serif;">팝업 이미지 영역<br>'+imgW+'×'+imgH+'px</div>'
       + '<button style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;backdrop-filter:blur(4px);">✕</button>'
       + '</div>'
       + (hasToday ? '<div style="margin-top:10px;font-size:11px;color:#aaa;display:flex;align-items:center;justify-content:center;gap:6px;"><input type="checkbox"><span>오늘 하루 안 보기</span></div>' : '')
@@ -2403,39 +3565,46 @@ function applyAddElement() {
       ? '<a href="'+link+'" style="display:block;"><img id="_sp_img" src="" style="width:100%;height:auto;display:block;border-radius:0;"></a>'
       : '<img id="_sp_img" src="" style="width:100%;height:auto;display:block;border-radius:0;">';
 
-    // 오늘 하루 안 보기
+    // 오늘 하루 안 보기 — id="_sp_td_row" + class styled via CSS
+    // ★ JS string literal 안에 박힐 라벨 = 어퍼스트로피·인용부호 사고 방지 위해 안전한 단어로 (= EN "Hide today")
+    const todayLabel = (currentLang === 'en') ? 'Hide today' : '오늘 하루 안 보기';
     const todayRow = hasToday
-      ? '<label style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.7);font-family:inherit;"><input type="checkbox" id="_sp_td_chk" style="cursor:pointer;"> 오늘 하루 안 보기</label>'
+      ? '<label id="_sp_td_row"><input type="checkbox" id="_sp_td_chk" style="cursor:pointer;"> '+todayLabel+'</label>'
       : '';
 
     code = [
       '',
-      '<!-- ✚ 팝업 배너 (이미지 에디터 추가) / 이미지: '+imgW+'×'+imgH+'px -->',
+      '<!-- popup banner / image: '+imgW+'x'+imgH+'px -->',
       '<style>',
-      '#_sp_wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);}',
-      '#_sp_box{position:relative;max-width:'+maxW+';width:100%;border-radius:4px;overflow:hidden;box-shadow:0 16px 60px rgba(0,0,0,.6);}',
-      '#_sp_close{position:absolute;top:0;right:0;width:36px;height:36px;background:rgba(0,0,0,.5);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;transition:background .2s;}',
-      '#_sp_close:hover{background:rgba(0,0,0,.8);}',
-      '#_sp_today{text-align:center;padding:8px;background:rgba(0,0,0,.5);}',
+      '#_sp_wrap{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-sizing:border-box;}',
+      '#_sp_box{position:relative;max-width:'+maxW+';width:100%;border-radius:4px;overflow:hidden;box-shadow:0 16px 60px rgba(0,0,0,.6);background:#000;}',
+      '#_sp_close{position:absolute;top:8px;right:8px;width:36px;height:36px;background:rgba(0,0,0,.55);border:0;color:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;border-radius:50%;transition:background .15s;font-family:inherit;padding:0;}',
+      '#_sp_close:hover{background:rgba(0,0,0,.9);}',
+      '#_sp_img{width:100%;height:auto;display:block;}',
+      '#_sp_td_row{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.78);font-size:12px;cursor:pointer;font-family:inherit;}',
+      'html._sp_open,body._sp_open{overflow:hidden!important;}',
+      '@media (max-width:480px){#_sp_wrap{padding:8px;}#_sp_close{top:6px;right:6px;width:34px;height:34px;}}',
       '</style>',
       '<script>',
       '(function(){',
-      '  if(localStorage.getItem("_spn")&&Date.now()-+localStorage.getItem("_spn")<86400000)return;',
-      '  function _spClose(){var w=document.getElementById("_sp_wrap");if(w)w.remove();}',
+      '  try{if(localStorage.getItem("_spn")&&Date.now()-+localStorage.getItem("_spn")<86400000)return;}catch(e){}',
+      '  function _spLock(on){try{document.documentElement.classList.toggle("_sp_open",!!on);document.body&&document.body.classList.toggle("_sp_open",!!on);}catch(e){}}',
+      '  function _spClose(){var w=document.getElementById("_sp_wrap");if(w&&w.parentNode){w.parentNode.removeChild(w);}_spLock(false);document.removeEventListener("keydown",_spKey,true);}',
+      '  function _spKey(e){if(e.key==="Escape"||e.keyCode===27){e.preventDefault();_spClose();}}',
       '  function _spShow(){',
+      '    if(document.getElementById("_sp_wrap"))return;',
       '    var d=document.createElement("div");d.id="_sp_wrap";',
       '    d.innerHTML=\'<div id="_sp_box">\'',
-      '      +\'<button id="_sp_close" onclick="_spClose()">✕</button>\'',
+      '      +\'<button id="_sp_close" type="button" aria-label="Close">×</button>\'',
       '      +\'' + imgInner + '\'',
       '      +\'' + todayRow + '\'',
       '      +\'</div>\';',
       '    document.body.appendChild(d);',
-      (closeOut ? '    d.addEventListener("click",function(e){if(e.target===d)_spClose();});' : ''),
-      '    if(document.getElementById("_sp_td_chk")){',
-      '      document.getElementById("_sp_td_chk").onchange=function(){',
-      '        if(this.checked){localStorage.setItem("_spn",Date.now());_spClose();}',
-      '      };',
-      '    }',
+      '    _spLock(true);',
+      '    document.addEventListener("keydown",_spKey,true);',
+      '    var btn=d.querySelector("#_sp_close");if(btn){btn.onclick=function(e){e.stopPropagation();_spClose();};}',
+      (closeOut ? '    d.addEventListener("click",function(e){if(e.target===d){_spClose();}});' : ''),
+      '    var chk=d.querySelector("#_sp_td_chk");if(chk){chk.onchange=function(){if(this.checked){try{localStorage.setItem("_spn",Date.now());}catch(e){}_spClose();}};}',
       '  }',
       '  ' + timingScript,
       '})();',
@@ -2443,9 +3612,11 @@ function applyAddElement() {
     ].filter(Boolean).join('\n');
 
   } else {
-    const text    = (document.getElementById('ae-cookie-text')?.value||'쿠키를 사용합니다.').replace(/</g,'&lt;');
-    const accept  = (document.getElementById('ae-cookie-accept')?.value||'동의').replace(/</g,'&lt;');
-    const decline = (document.getElementById('ae-cookie-decline')?.value||'거부').replace(/</g,'&lt;');
+    // ★ JS string + HTML 안에 박힐 텍스트 = 어퍼스트로피·인용부호·꺽쇠 다 escape (popup 어퍼스트로피 사고 방지)
+    const escForInlineJs = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const text    = escForInlineJs(document.getElementById('ae-cookie-text')?.value||'쿠키를 사용합니다.');
+    const accept  = escForInlineJs(document.getElementById('ae-cookie-accept')?.value||'동의');
+    const decline = escForInlineJs(document.getElementById('ae-cookie-decline')?.value||'거부');
     const pos     = document.getElementById('ae-cookie-pos')?.value || 'bottom';
     const bg      = document.getElementById('ae-cookie-bg')?.value || '#2d2d2d';
     const btnc    = document.getElementById('ae-cookie-btncolor')?.value || '#4d96ff';
@@ -2453,16 +3624,23 @@ function applyAddElement() {
 
     code = [
       '',
-      '<!-- ✚ 쿠키 동의 (이미지 에디터 추가) -->',
-      '<style>#_ck{position:fixed;'+posCSS+'z-index:9990;background:'+bg+';color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-family:inherit;}</style>',
+      '<!-- cookie consent -->',
+      '<style>#_ck{position:fixed;'+posCSS+'z-index:9990;background:'+bg+';color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-family:inherit;box-sizing:border-box;}#_ck button{cursor:pointer;font-size:12px;font-family:inherit;border:0;padding:7px 16px;border-radius:6px;color:#fff;}#_ck_a{background:'+btnc+';}#_ck_d{background:rgba(255,255,255,.15);}</style>',
       '<script>',
       '(function(){',
-      '  if(localStorage.getItem("_ck_consent"))return;',
-      '  var d=document.createElement("div");d.id="_ck";',
-      '  d.innerHTML=\'<span style="flex:1">'+text+'</span>\'',
-      '    +\'<button onclick="localStorage.setItem(\\"_ck_consent\\",\\"1\\");this.parentNode.remove();" style="background:'+btnc+';color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">'+accept+'</button>\'',
-      '    +\'<button onclick="localStorage.setItem(\\"_ck_consent\\",\\"0\\");this.parentNode.remove();" style="background:rgba(255,255,255,.15);color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">'+decline+'</button>\';',
-      '  document.body.appendChild(d);',
+      '  try{if(localStorage.getItem("_ck_consent"))return;}catch(e){}',
+      '  function _ckClose(v){try{localStorage.setItem("_ck_consent",v);}catch(e){}var d=document.getElementById("_ck");if(d&&d.parentNode){d.parentNode.removeChild(d);}}',
+      '  function _ckShow(){',
+      '    if(document.getElementById("_ck"))return;',
+      '    var d=document.createElement("div");d.id="_ck";',
+      '    d.innerHTML=\'<span style="flex:1">'+text+'</span>\'',
+      '      +\'<button id="_ck_a" type="button">'+accept+'</button>\'',
+      '      +\'<button id="_ck_d" type="button">'+decline+'</button>\';',
+      '    document.body.appendChild(d);',
+      '    d.querySelector("#_ck_a").onclick=function(){_ckClose("1");};',
+      '    d.querySelector("#_ck_d").onclick=function(){_ckClose("0");};',
+      '  }',
+      '  if(document.body){_ckShow();}else{document.addEventListener("DOMContentLoaded",_ckShow);}',
       '})();',
       '<\/script>',
     ].join('\n');
@@ -2480,7 +3658,7 @@ function applyAddElement() {
   // 그리드 재렌더 (팝업 이미지 카드 추가)
   renderGrid().then(() => {
     syncStats(); syncChangeList();
-    toast('✅ 추가됐어요! 이미지 탭에서 팝업 이미지를 🔄 교체해보세요.');
+    toast(t('msg.addOk'));
   });
   closeAddElement();
   document.getElementById('btn-download').disabled = false;
@@ -2494,7 +3672,7 @@ function resetAll() {
     const card = document.getElementById('card-' + i);
     if (!card) return;
     card.classList.remove('deleted', 'replaced');
-    document.getElementById('delbtn-' + i).textContent = '🗑 삭제';
+    document.getElementById('delbtn-' + i).textContent = t('card.delete');
     document.getElementById('cst-' + i).textContent = '';
     document.getElementById('thumb-' + i).src = img.thumb;
   });
@@ -2554,21 +3732,206 @@ function syncStats() {
   const te = Object.keys(txtEdited).length;
   const td = txtDeleted.size;
   const rs = Object.keys(resized).length + Object.keys(parentResized).length;
-  document.getElementById('s-total').textContent = images.length;
-  document.getElementById('s-deleted').textContent = d + td;
-  document.getElementById('s-replaced').textContent = r + te + rs;
-  document.getElementById('s-changed').textContent = d + r + te + td + rs;
+  const setVal = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = v;
+    el.classList.toggle('is-zero', !v);
+  };
+  setVal('s-total', images.length);
+  setVal('s-deleted', d + td);
+  setVal('s-replaced', r + te + rs);
+  setVal('s-changed', d + r + te + td + rs);
+  scheduleAutosave();
+}
+
+// ════════════════════════════════════
+//  로컬 자동 저장 (IndexedDB)
+//   - 5초마다 작업 상태 자동 저장
+//   - 페이지 새로고침해도 복구 다이얼로그
+//   - 모든 데이터는 브라우저 안에만, 서버 전송 X
+// ════════════════════════════════════
+const AUTOSAVE_DB = 'sunnyEditor';
+const AUTOSAVE_STORE = 'sessions';
+const AUTOSAVE_KEY = 'currentSession';
+let _autosaveTimer = null;
+let _autosaveDB = null;
+
+function openAutosaveDB() {
+  return new Promise((resolve, reject) => {
+    if (_autosaveDB) return resolve(_autosaveDB);
+    try {
+      const req = indexedDB.open(AUTOSAVE_DB, 1);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(AUTOSAVE_STORE)) db.createObjectStore(AUTOSAVE_STORE);
+      };
+      req.onsuccess = e => { _autosaveDB = e.target.result; resolve(_autosaveDB); };
+      req.onerror = e => reject(e.target.error);
+    } catch (e) { reject(e); }
+  });
+}
+
+async function autosaveNow() {
+  if (!currentHtml || !currentFileName) return; // 파일 안 불러왔으면 저장 X
+  try {
+    const db = await openAutosaveDB();
+    const snapshot = {
+      version: 1,
+      savedAt: Date.now(),
+      fileName: currentFileName,
+      currentHtml,
+      uploadMode: typeof uploadMode !== 'undefined' ? uploadMode : 'html',
+      siteBundleName: siteBundle ? siteBundle.name : null,
+      siteBundleHtmlPath: siteBundle ? siteBundle.htmlPath : null,
+      // 핵심 편집 상태
+      deleted: [...deleted],
+      replaced: {...replaced},  // dataURL 포함 — 큼
+      txtEdited: {...(typeof txtEdited !== 'undefined' ? txtEdited : {})},
+      txtDeleted: [...(typeof txtDeleted !== 'undefined' ? txtDeleted : new Set())],
+      resized: {...(typeof resized !== 'undefined' ? resized : {})},
+      parentResized: {...(typeof parentResized !== 'undefined' ? parentResized : {})},
+    };
+    const tx = db.transaction(AUTOSAVE_STORE, 'readwrite');
+    tx.objectStore(AUTOSAVE_STORE).put(snapshot, AUTOSAVE_KEY);
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  } catch (e) {
+    // 저장 실패는 silent (UX 방해 X)
+    console.debug('autosave failed:', e);
+  }
+}
+
+function scheduleAutosave() {
+  if (_autosaveTimer) clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(autosaveNow, 2500); // 2.5초 debounce
+}
+
+async function clearAutosave() {
+  try {
+    const db = await openAutosaveDB();
+    const tx = db.transaction(AUTOSAVE_STORE, 'readwrite');
+    tx.objectStore(AUTOSAVE_STORE).delete(AUTOSAVE_KEY);
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  } catch (e) {}
+}
+
+async function loadAutosave() {
+  try {
+    const db = await openAutosaveDB();
+    const tx = db.transaction(AUTOSAVE_STORE, 'readonly');
+    const req = tx.objectStore(AUTOSAVE_STORE).get(AUTOSAVE_KEY);
+    return await new Promise((res, rej) => {
+      req.onsuccess = () => res(req.result || null);
+      req.onerror = () => rej(req.error);
+    });
+  } catch (e) { return null; }
+}
+
+async function checkAutosaveOnLoad() {
+  const snap = await loadAutosave();
+  if (!snap) return;
+  // 너무 오래된 (= 7일 이상) snapshot은 자동 제거
+  if (Date.now() - snap.savedAt > 7*24*60*60*1000) { clearAutosave(); return; }
+  showAutosaveBanner(snap);
+}
+
+function showAutosaveBanner(snap) {
+  const existing = document.getElementById('autosave-banner');
+  if (existing) existing.remove();
+  const minsAgo = Math.max(1, Math.round((Date.now() - snap.savedAt) / 60000));
+  const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+  const txt = isEn
+    ? `Found previous session: <b>${escapeHtmlSafe(snap.fileName)}</b> · ${minsAgo} min ago`
+    : `이전 작업 발견: <b>${escapeHtmlSafe(snap.fileName)}</b> · ${minsAgo}분 전`;
+  const restoreLabel = isEn ? 'Restore' : '복구';
+  const discardLabel = isEn ? 'Discard' : '버리기';
+  const banner = document.createElement('div');
+  banner.id = 'autosave-banner';
+  banner.innerHTML = `
+    <span class="ab-text">${txt}</span>
+    <button class="ab-btn ab-primary" id="ab-restore">${restoreLabel}</button>
+    <button class="ab-btn" id="ab-discard">${discardLabel}</button>
+  `;
+  document.body.appendChild(banner);
+  document.getElementById('ab-restore').onclick = async () => {
+    banner.remove();
+    await restoreAutosave(snap);
+  };
+  document.getElementById('ab-discard').onclick = async () => {
+    banner.remove();
+    await clearAutosave();
+  };
+}
+
+function escapeHtmlSafe(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[c]));
+}
+
+async function restoreAutosave(snap) {
+  try {
+    showProg(t('prog.htmlRead'), 10); await tick();
+    // 원본 HTML을 가짜 File 로 만들어서 processHtmlFile 통과
+    currentFileName = snap.fileName;
+    const blob = new Blob([snap.currentHtml], { type: 'text/html' });
+    const file = new File([blob], snap.fileName, { type: 'text/html' });
+    await processHtmlFile(file);
+    // 편집 상태 복원
+    deleted = new Set(snap.deleted || []);
+    Object.keys(replaced).forEach(k => delete replaced[k]);
+    Object.assign(replaced, snap.replaced || {});
+    if (typeof txtEdited !== 'undefined') {
+      Object.keys(txtEdited).forEach(k => delete txtEdited[k]);
+      Object.assign(txtEdited, snap.txtEdited || {});
+    }
+    if (typeof txtDeleted !== 'undefined') {
+      txtDeleted.clear();
+      (snap.txtDeleted || []).forEach(i => txtDeleted.add(i));
+    }
+    if (typeof resized !== 'undefined') {
+      Object.keys(resized).forEach(k => delete resized[k]);
+      Object.assign(resized, snap.resized || {});
+    }
+    if (typeof parentResized !== 'undefined') {
+      Object.keys(parentResized).forEach(k => delete parentResized[k]);
+      Object.assign(parentResized, snap.parentResized || {});
+    }
+    // UI 다시 그리기
+    await renderGrid();
+    if (typeof renderTextList === 'function') renderTextList();
+    if (typeof applyFilter === 'function') applyFilter();
+    // 교체된 이미지 카드 = 복원된 dataURL로 thumb 갱신
+    Object.keys(replaced).forEach(i => {
+      const thumb = document.getElementById('thumb-' + i);
+      if (thumb) thumb.src = replaced[i];
+      const card = document.getElementById('card-' + i);
+      if (card) card.classList.add('replaced');
+      const cst = document.getElementById('cst-' + i);
+      if (cst) cst.textContent = t('st.willReplace');
+    });
+    deleted.forEach(i => {
+      const card = document.getElementById('card-' + i);
+      if (card) card.classList.add('deleted');
+    });
+    syncStats(); syncChangeList();
+    hideProg();
+    toast(t('msg.restored') || '복구 완료');
+  } catch (e) {
+    hideProg();
+    toast('Restore failed: ' + e.message);
+  }
 }
 function syncChangeList() {
   const list = document.getElementById('change-list');
   const items = [];
+  const tdel = t('card.delete'), trep = t('card.replaced'), tedit = t('filter.edited');
+  const tundo = t('card.restoreDel');
   // 이미지 삭제
   deleted.forEach(i => {
     const name = images[i] ? images[i].name : `#${i+1}`;
     items.push(`<div class="change-item del">
       <div class="ci-dot"></div>
-      <div class="ci-label">🖼 ${name} 삭제</div>
-      <button class="ci-undo" onclick="toggleDelete(${i})" title="취소">✕</button>
+      <div class="ci-label">IMG · ${name} — ${tdel}</div>
+      <button class="ci-undo" onclick="toggleDelete(${i})" title="${tundo}">×</button>
     </div>`);
   });
   // 이미지 교체
@@ -2576,33 +3939,33 @@ function syncChangeList() {
     const name = images[i] ? images[i].name : `#${parseInt(i)+1}`;
     items.push(`<div class="change-item rep">
       <div class="ci-dot"></div>
-      <div class="ci-label">🖼 ${name} 교체</div>
-      <button class="ci-undo" onclick="undoReplace(${i})" title="취소">✕</button>
+      <div class="ci-label">IMG · ${name} — ${trep}</div>
+      <button class="ci-undo" onclick="undoReplace(${i})" title="${tundo}">×</button>
     </div>`);
   });
   // 크기 변경
   Object.keys(resized).forEach(i => {
     const name = images[i] ? images[i].name : '#'+(parseInt(i)+1);
     const rz = resized[i];
-    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">📐 '+name+' ('+( rz.w||'auto')+' × '+(rz.h||'auto')+')</div><button class="ci-undo" onclick="undoResize('+i+')" title="취소">✕</button></div>');
+    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">SIZE · '+name+' ('+( rz.w||'auto')+' × '+(rz.h||'auto')+')</div><button class="ci-undo" onclick="undoResize('+i+')" title="'+tundo+'">×</button></div>');
   });
   Object.keys(parentResized).forEach(i => {
     const name = images[i] ? images[i].name : '#'+(parseInt(i)+1);
-    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">📦 '+name+' 컨테이너 높이→'+parentResized[i]+'</div><button class="ci-undo" onclick="undoParentResize('+i+')" title="취소">✕</button></div>');
+    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">BOX · '+name+' → '+parentResized[i]+'</div><button class="ci-undo" onclick="undoParentResize('+i+')" title="'+tundo+'">×</button></div>');
   });
   // 텍스트 수정
   Object.keys(txtEdited).forEach(i => {
     const orig = textNodes[i] ? textNodes[i].original : '';
     const short = orig.length > 20 ? orig.slice(0,20)+'…' : orig;
-    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">✏️ "'+short+'" 수정</div><button class="ci-undo" onclick="undoTxtEdit('+i+')" title="취소">✕</button></div>');
+    items.push('<div class="change-item rep"><div class="ci-dot"></div><div class="ci-label">TXT · "'+short+'" — '+tedit+'</div><button class="ci-undo" onclick="undoTxtEdit('+i+')" title="'+tundo+'">×</button></div>');
   });
   // 텍스트 삭제
   txtDeleted.forEach(i => {
     const orig = textNodes[i] ? textNodes[i].original : '';
     const short = orig.length > 20 ? orig.slice(0,20)+'…' : orig;
-    items.push('<div class="change-item del"><div class="ci-dot"></div><div class="ci-label">✏️ "'+short+'" 삭제</div><button class="ci-undo" onclick="toggleTxtDelete('+i+')" title="취소">✕</button></div>');
+    items.push('<div class="change-item del"><div class="ci-dot"></div><div class="ci-label">TXT · "'+short+'" — '+tdel+'</div><button class="ci-undo" onclick="toggleTxtDelete('+i+')" title="'+tundo+'">×</button></div>');
   });
-  list.innerHTML = items.length ? items.join('') : '<div class="change-empty">변경 사항 없음</div>';
+  list.innerHTML = items.length ? items.join('') : `<div class="change-empty">${t('side.changes.empty')}</div>`;
 }
 function undoReplace(i) {
   delete replaced[i];
@@ -2745,12 +4108,18 @@ function escapeHtml(s) {
 // ════════════════════════════════════
 async function downloadNew() {
   const hasChanges = deleted.size > 0 || Object.keys(replaced).length > 0 || Object.keys(txtEdited).length > 0 || txtDeleted.size > 0 || Object.keys(resized).length > 0 || Object.keys(parentResized).length > 0;
-  if (!hasChanges) { toast('⚠ 변경 사항이 없습니다'); return; }
-  showProg('HTML 생성 중...', 20); await tick();
+  if (!hasChanges) { toast(t('msg.noChanges')); return; }
+
+  // 사이트 번들(ZIP/폴더)이면 = ZIP으로 다시 묶어서 내보냄
+  if (siteBundle) {
+    return downloadBundleZip();
+  }
+
+  showProg(t('prog.html'), 20); await tick();
   try {
-    setProg('이미지 처리 중...', 55); await tick();
+    setProg(t('prog.img'), 55); await tick();
     const html = await buildHtml();
-    setProg('파일 저장 중...', 88); await tick();
+    setProg(t('prog.saving'), 88); await tick();
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2758,21 +4127,131 @@ async function downloadNew() {
     a.href = url; a.download = base + '_edited.html';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setProg('완료!', 100); await tick(300);
-    toast('다운로드 완료 🎉');
+    setProg(t('prog.done'), 100); await tick(300);
+    toast(t('msg.downloaded')); clearAutosave();
   } catch (e) { toast('오류: ' + e.message); }
   finally { hideProg(); }
+}
+
+// ZIP/폴더 모드 다운로드 = 사이트 통째 ZIP 재패킹
+async function downloadBundleZip() {
+  showProg(t('prog.zipPack'), 10); await tick();
+  try {
+    await ensureJSZip();
+    const builtHtml = await buildHtml();
+    setProg(t('prog.zipAssets'), 35); await tick();
+
+    // blob: URL을 원래 상대경로로 되돌리고, data: URL은 새 파일로 추가
+    const baseDir = siteBundle.htmlPath.includes('/')
+      ? siteBundle.htmlPath.substring(0, siteBundle.htmlPath.lastIndexOf('/') + 1)
+      : '';
+    const newImagesByPath = new Map(); // path → Blob
+    let imgIdx = 0;
+
+    // src="blob:..." or src="data:..." 처리
+    const restoredHtml = builtHtml.replace(
+      /(src|href|data-src)\s*=\s*["']([^"']+)["']([^>]*?\bdata-original-src\s*=\s*["']([^"']+)["'])?/gi,
+      (full, attr, val, restRaw, originalSrc) => {
+        if (originalSrc) {
+          // 인라인된 자원 = data: 또는 blob: 이고, data-original-src로 원래 상대경로가 있음
+          if (val.startsWith('data:')) {
+            // 새로 교체된 이미지 = data: → 원래 경로로 저장 (덮어쓰기)
+            const targetPath = resolvePath(baseDir, originalSrc);
+            const blob = dataUrlToBlob(val);
+            newImagesByPath.set(targetPath, blob);
+            return `${attr}="${escAttr(originalSrc)}"`;
+          } else {
+            // 변경 없음 = 원래 경로 그대로
+            return `${attr}="${escAttr(originalSrc)}"`;
+          }
+        }
+        // data-original-src가 없는데 blob/data 시작이면 = 외부에서 새로 추가된 이미지 (popup 등)
+        if (val.startsWith('data:')) {
+          const ext = (val.match(/^data:image\/([a-zA-Z0-9+]+);/)?.[1] || 'png').toLowerCase().replace('jpeg','jpg');
+          const newPath = `${baseDir}images/_added_${Date.now()}_${imgIdx++}.${ext}`;
+          newImagesByPath.set(newPath, dataUrlToBlob(val));
+          // path는 baseDir 기준 상대로 다시 (baseDir 제거)
+          const relPath = baseDir ? newPath.substring(baseDir.length) : newPath;
+          return `${attr}="${escAttr(relPath)}"`;
+        }
+        return full;
+      }
+    );
+
+    // <style data-from="x.css">...</style> 블록 = 원래 외부 CSS로 복귀
+    const cssChanges = new Map();
+    const styleSplitHtml = restoredHtml.replace(
+      /<style\s+data-from\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/style>/gi,
+      (full, cssPath, cssBody) => {
+        cssChanges.set(cssPath, cssBody.trim());
+        // 원래 link 태그 형태로 복귀
+        const rel = baseDir ? cssPath.substring(baseDir.length) : cssPath;
+        return `<link rel="stylesheet" href="${escAttr(rel)}">`;
+      }
+    );
+
+    setProg(t('prog.zipBuild'), 65); await tick();
+    const zip = new JSZip();
+    // 원래 파일들 다 포함
+    for (const [path, blob] of siteBundle.files) {
+      // 메인 HTML은 새 버전으로
+      if (path === siteBundle.htmlPath) {
+        zip.file(path, styleSplitHtml);
+        continue;
+      }
+      // 변경된 CSS는 새 내용으로
+      if (cssChanges.has(path)) {
+        zip.file(path, cssChanges.get(path));
+        continue;
+      }
+      // 교체된 이미지는 새 Blob으로
+      if (newImagesByPath.has(path)) {
+        zip.file(path, newImagesByPath.get(path));
+        continue;
+      }
+      zip.file(path, blob);
+    }
+    // 새로 추가된 이미지 (popup 등)
+    for (const [path, blob] of newImagesByPath) {
+      if (!siteBundle.files.has(path)) {
+        zip.file(path, blob);
+      }
+    }
+
+    setProg(t('prog.zipCompress'), 85); await tick();
+    const out = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    setProg(t('prog.saving'), 95); await tick();
+    const url = URL.createObjectURL(out);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (siteBundle.name || 'site') + '_edited.zip';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setProg(t('prog.done'), 100); await tick(300);
+    toast(t('msg.zipDone')); clearAutosave();
+  } catch (e) {
+    toast('ZIP 내보내기 오류: ' + e.message);
+  } finally { hideProg(); }
+}
+
+function dataUrlToBlob(dataUrl) {
+  const arr = dataUrl.split(',');
+  const mime = (arr[0].match(/:(.*?);/) || [,'application/octet-stream'])[1];
+  const bstr = atob(arr[1]);
+  const bytes = new Uint8Array(bstr.length);
+  for (let i = 0; i < bstr.length; i++) bytes[i] = bstr.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
 }
 
 // ════════════════════════════════════
 //  ZIP 내보내기
 // ════════════════════════════════════
 async function downloadZip() {
-  showProg('ZIP 준비 중...', 10); await tick();
+  showProg(t('prog.zipPrep'), 10); await tick();
   try {
     // JSZip 동적 로드
     if (!window.JSZip) {
-      setProg('JSZip 로드 중...', 15); await tick();
+      setProg(t('prog.jszipLoad'), 15); await tick();
       await new Promise((res, rej) => {
         const s = document.createElement('script');
         s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
@@ -2854,10 +4333,10 @@ async function downloadZip() {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
 
-    setProg('완료!', 100); await tick(300);
+    setProg(t('prog.done'), 100); await tick(300);
     const msg = hasChanges
-      ? '📦 ZIP 완료! (원본 + 수정본 HTML + 이미지 폴더 + 텍스트 문서)'
-      : '📦 ZIP 완료! (원본 HTML + 이미지 폴더 + 텍스트 문서)';
+      ? t('msg.zipOk')
+      : t('msg.zipOkNoEdit');
     toast(msg);
   } catch(e) { toast('오류: ' + e.message); console.error(e); }
   finally { hideProg(); }
@@ -2999,8 +4478,7 @@ function buildWordDoc() {
   body { font-family: '맑은 고딕', 'Malgun Gothic', Arial, sans-serif; margin: 2cm; line-height: 1.8; }
   table { border-collapse: collapse; width: 100%; margin: 10pt 0; }
   td, th { border: 1px solid #999; padding: 5pt 7pt; }
-  th { background: #e8e8e8; font-weight: bold; }
-</style>
+  th { background: #e8e8e8; font-weight: bold; }</style>
 </head>
 <body>
 <h1 style="font-size:18pt;color:#1a1a2e;border-bottom:2px solid #4d96ff;padding-bottom:6pt;margin-bottom:4pt;">
@@ -3046,7 +4524,7 @@ function selectShareOpt(el, type) {
 
 async function generateShare() {
   document.getElementById('btn-gen-share').disabled = true;
-  showProg('공유 링크 생성 중...', 30); await tick();
+  showProg(t('prog.shareGen'), 30); await tick();
   try {
     const html = await buildHtml();
     setProg('처리 중...', 70); await tick();
@@ -3082,9 +4560,9 @@ async function generateShare() {
         const tinyResp = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(previewUrl));
         if (tinyResp.ok) shortUrl = await tinyResp.text();
       } catch(e) { /* 실패해도 긴 URL 그대로 사용 */ }
-      setProg('완료!', 100); await tick(300);
+      setProg(t('prog.done'), 100); await tick(300);
       showShareResult(shortUrl,
-        '✅ 공유 링크 생성 완료!\n이 URL을 슬랙, 카카오톡, 이메일로 보내세요.'
+        t('msg.shareOk')
         + (shortUrl !== previewUrl ? '\n\n📎 원본 링크: ' + previewUrl : '')
         + '\n📎 Gist: ' + gist.html_url);
 
@@ -3098,7 +4576,7 @@ async function generateShare() {
       showShareResult('파일이 다운로드되었습니다',
         '📤 카카오톡, 슬랙, 이메일 등에 첨부하거나 구글 드라이브에 올려 공유 링크를 만드세요.');
     }
-    setProg('완료!', 100); await tick(300);
+    setProg(t('prog.done'), 100); await tick(300);
   } catch(e) { toast('오류: ' + e.message); }
   finally { hideProg(); document.getElementById('btn-gen-share').disabled = false; }
 }
@@ -3128,8 +4606,8 @@ function selectAll(mode) {
       delete replaced[i];
       const card = document.getElementById('card-' + i);
       card.classList.add('deleted'); card.classList.remove('replaced');
-      document.getElementById('delbtn-' + i).textContent = '↩ 취소';
-      document.getElementById('cst-' + i).textContent = '삭제 예정';
+      document.getElementById('delbtn-' + i).textContent = t('card.restoreDel');
+      document.getElementById('cst-' + i).textContent = t('st.willDelete');
     });
     syncStats(); syncChangeList(); applyFilter();
   }
@@ -3162,6 +4640,52 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   if (e.target.closest('#add-element-modal-bg')) aeUpdatePreview();
 });
+
+// ════════════════════════════════════
+//  i18n 초기화 (= 페이지 로드 시 언어 감지 + UI 갱신)
+// ════════════════════════════════════
+function initI18n() {
+  try { currentLang = detectLang(); } catch (e) { currentLang = 'ko'; }
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+  applyI18n();
+  // 초기 모드별 안내 (= switchUploadMode 호출하지 않고 직접 i18n 적용)
+  if (typeof uploadMode !== 'undefined' && typeof switchUploadMode === 'function') {
+    switchUploadMode(uploadMode);
+  }
+  // 자동 저장 복구 다이얼로그
+  if (typeof checkAutosaveOnLoad === 'function') {
+    setTimeout(checkAutosaveOnLoad, 300);
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initI18n);
+} else {
+  initI18n();
+}
 </script>
+<!-- 푸터 -->
+<footer class="app-footer">
+  <div class="copyright" data-i18n="footer.copy">&copy; 2026 SUNNY ENTERTAINMENT INC. All rights reserved.</div>
+  <div class="footer-meta">
+    <span>SUNNY EDITOR</span>
+    <span>v1.1</span>
+  </div>
+</footer>
+
+<!-- 광고 슬롯 (출시 후 Google AdSense 승인되면 활성화) -->
+<!--
+<div class="ad-slot" id="ad-slot-footer">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+-->
+
 </body>
 </html>

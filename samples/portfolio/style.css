@@ -1,0 +1,94 @@
+/* 김민지 포트폴리오 — 다중 페이지 샘플 (외부 CSS 공유) */
+:root {
+  --bg: #FFFFFF;
+  --text: #111;
+  --muted: #6B6B6B;
+  --line: rgba(0, 0, 0, 0.1);
+  --accent: #FF4B2B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Helvetica Neue', Helvetica, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  line-height: 1.55;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+.nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--line);
+}
+.logo { font-weight: 700; letter-spacing: -0.02em; font-size: 16px; }
+.nav nav { display: flex; gap: 28px; font-size: 14px; }
+.nav nav a[aria-current="page"] { color: var(--accent); }
+
+.works, .about, .contact {
+  max-width: 1100px; margin: 0 auto;
+  padding: 64px 40px;
+}
+.works h1, .about h1, .contact h1 {
+  font-size: 40px; font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.lede { color: var(--muted); font-size: 16px; margin-bottom: 40px; }
+
+.grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+.work { display: block; }
+.work img {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  background: #F4F4F4;
+  margin-bottom: 12px;
+}
+.work .meta { font-size: 13px; }
+.work .meta span {
+  display: block; color: var(--accent);
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.work .meta strong { font-weight: 600; }
+
+.about {
+  display: grid; grid-template-columns: 280px 1fr; gap: 56px; align-items: start;
+}
+.portrait { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+.about-text p { color: var(--muted); margin-bottom: 14px; font-size: 16px; }
+.about-text h2 {
+  margin-top: 36px; margin-bottom: 12px;
+  font-size: 20px; font-weight: 600;
+}
+.about-text ul { list-style: none; padding: 0; }
+.about-text li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.contact-list {
+  display: grid; grid-template-columns: 100px 1fr;
+  gap: 12px 20px; margin-top: 32px;
+}
+.contact-list dt {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding-top: 6px;
+}
+.contact-list dd { font-size: 15px; padding: 4px 0 18px; border-bottom: 1px solid var(--line); }
+.contact-list dd a { color: var(--accent); }
+
+.foot {
+  padding: 32px 40px;
+  font-size: 11px; color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 16px 20px; }
+  .works, .about, .contact { padding: 40px 20px; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .about { grid-template-columns: 1fr; gap: 24px; }
+  .contact-list { grid-template-columns: 80px 1fr; }
+}

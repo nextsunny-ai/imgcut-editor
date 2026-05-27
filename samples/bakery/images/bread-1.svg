@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
+  <rect width="200" height="160" fill="#F0E4D0"/>
+  <ellipse cx="100" cy="95" rx="80" ry="50" fill="#D9B98A"/>
+  <ellipse cx="100" cy="80" rx="70" ry="35" fill="#C9A77A"/>
+  <text x="100" y="145" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8B7355">사워도우</text>
+</svg>

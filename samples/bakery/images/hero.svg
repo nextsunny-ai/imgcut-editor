@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
+  <rect width="480" height="360" fill="#E8D9BF"/>
+  <ellipse cx="240" cy="220" rx="140" ry="90" fill="#C9A77A"/>
+  <ellipse cx="240" cy="190" rx="120" ry="70" fill="#D9B98A"/>
+  <path d="M 180 170 Q 240 130 300 170" stroke="#A07943" stroke-width="3" fill="none"/>
+  <path d="M 195 180 Q 240 145 285 180" stroke="#A07943" stroke-width="2" fill="none"/>
+  <text x="240" y="320" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#8B7355">갓 구운 빵 이미지</text>
+</svg>

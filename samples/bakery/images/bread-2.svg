@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
+  <rect width="200" height="160" fill="#E8D5B6"/>
+  <ellipse cx="100" cy="100" rx="75" ry="40" fill="#9A7E5C"/>
+  <ellipse cx="100" cy="85" rx="65" ry="30" fill="#8B6F4E"/>
+  <text x="100" y="145" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#5A4A36">호밀 캄파뉴</text>
+</svg>

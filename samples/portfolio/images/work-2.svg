@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
+  <rect width="480" height="360" fill="#C5D5E8"/>
+  <rect x="40" y="40" width="80" height="80" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="140" y="80" width="120" height="40" fill="#000000" opacity="0.15"/>
+  <text x="240" y="200" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="20" font-weight="600" fill="#222">월간 마감</text>
+  <text x="240" y="226" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#555" opacity="0.6">work 02</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280">
+  <rect width="280" height="280" fill="#EEE8E0"/>
+  <circle cx="140" cy="110" r="55" fill="#C9B59A"/>
+  <ellipse cx="140" cy="240" rx="100" ry="80" fill="#C9B59A"/>
+  <text x="140" y="270" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#7A6B58">portrait</text>
+</svg>
