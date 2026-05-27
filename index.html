@@ -1279,6 +1279,8 @@ a:hover { text-decoration: underline; }
     <button class="btn" id="btn-add-element" onclick="openAddElement()" disabled data-i18n="hdr.addEl">+ 요소 추가</button>
     <button class="btn" id="btn-share" onclick="openShare()" disabled data-i18n="hdr.share">공유 링크</button>
     <button class="btn" id="btn-zip" onclick="downloadZip()" disabled data-i18n="hdr.zip">ZIP</button>
+    <button class="btn" id="btn-pdf" onclick="downloadPdf()" disabled data-i18n="hdr.pdf">PDF</button>
+    <button class="btn" id="btn-ppt" onclick="downloadPpt()" disabled data-i18n="hdr.ppt">PPT</button>
     <button class="btn btn-primary" id="btn-download" onclick="downloadNew()" disabled data-i18n="hdr.download">다운로드</button>
     <button class="btn btn-ghost" id="btn-deploy-guide" onclick="openDeployGuide()" disabled data-i18n="hdr.deploy">배포 안내</button>
   </div>
@@ -1373,6 +1375,20 @@ a:hover { text-decoration: underline; }
       <div id="page-picker" style="display:none; margin-top: 12px;">
         <div class="sidebar-label" style="margin-bottom: 6px;" data-i18n="side.pagePicker">페이지 선택</div>
         <select id="page-select" onchange="switchPage(this.value)" class="ae-input" style="width:100%; padding:6px 8px; font-size:11px; font-family:var(--font-mono);"></select>
+      </div>
+
+      <!-- V1.1 — 페이지 사이즈 (PPT·PDF 출력 비율) -->
+      <div id="page-size-picker" style="margin-top: 12px;">
+        <div class="sidebar-label" style="margin-bottom: 6px;" data-i18n="side.pageSize">페이지 사이즈</div>
+        <select id="page-size-select" onchange="onPageSizeChange(this.value)" class="ae-input" style="width:100%; padding:6px 8px; font-size:11px; font-family:var(--font-mono);">
+          <option value="original" data-i18n="pageSize.original">원본</option>
+          <option value="169wide" data-i18n="pageSize.169wide">16:9 와이드 (1920×1080)</option>
+          <option value="169hd" data-i18n="pageSize.169hd">16:9 HD (1280×720)</option>
+          <option value="43" data-i18n="pageSize.43">4:3 (1024×768)</option>
+          <option value="916" data-i18n="pageSize.916">9:16 세로 (1080×1920)</option>
+          <option value="a4l" data-i18n="pageSize.a4l">A4 가로</option>
+          <option value="a4p" data-i18n="pageSize.a4p">A4 세로</option>
+        </select>
       </div>
     </div>
 
@@ -2010,6 +2026,26 @@ const I18N = {
     'msg.restored': '복구 완료',
     'msg.resetDone': '편집 내용 초기화됨 (파일은 유지)',
     'hdr.reset.tip': '편집 내용만 초기화 (불러온 파일은 유지)',
+    // V1.1 — PDF / PPT / 페이지 사이즈
+    'hdr.pdf': 'PDF',
+    'hdr.ppt': 'PPT',
+    'side.pageSize': '페이지 사이즈',
+    'pageSize.original': '원본',
+    'pageSize.169wide': '16:9 와이드 (1920×1080)',
+    'pageSize.169hd': '16:9 HD (1280×720)',
+    'pageSize.43': '4:3 (1024×768)',
+    'pageSize.916': '9:16 세로 (1080×1920)',
+    'pageSize.a4l': 'A4 가로',
+    'pageSize.a4p': 'A4 세로',
+    'msg.pdfReady': 'PDF 다운로드 완료',
+    'msg.pptReady': 'PPT 다운로드 완료 (슬라이드는 이미지 — 텍스트 편집 안 됨)',
+    'prog.pdf': 'PDF 생성 중...',
+    'prog.ppt': 'PPT 슬라이드 생성 중...',
+    'prog.pdfLib': 'PDF 라이브러리 로드 중...',
+    'prog.pptLib': 'PPT 라이브러리 로드 중...',
+    'prog.pageCapture': '페이지 캡처 중 {n}/{total}...',
+    'msg.pdfErr': 'PDF 생성 오류: {e}',
+    'msg.pptErr': 'PPT 생성 오류: {e}',
   },
   en: {
     // Header
@@ -2202,6 +2238,26 @@ const I18N = {
     'msg.restored': 'Restored',
     'msg.resetDone': 'Edits cleared (file kept)',
     'hdr.reset.tip': 'Reset edits only (loaded file is kept)',
+    // V1.1 — PDF / PPT / Page size
+    'hdr.pdf': 'PDF',
+    'hdr.ppt': 'PPT',
+    'side.pageSize': 'Page size',
+    'pageSize.original': 'Original',
+    'pageSize.169wide': '16:9 Wide (1920x1080)',
+    'pageSize.169hd': '16:9 HD (1280x720)',
+    'pageSize.43': '4:3 (1024x768)',
+    'pageSize.916': '9:16 Vertical (1080x1920)',
+    'pageSize.a4l': 'A4 Landscape',
+    'pageSize.a4p': 'A4 Portrait',
+    'msg.pdfReady': 'PDF downloaded',
+    'msg.pptReady': 'PPT downloaded (slides are images, text not editable)',
+    'prog.pdf': 'Building PDF...',
+    'prog.ppt': 'Building PPT slides...',
+    'prog.pdfLib': 'Loading PDF library...',
+    'prog.pptLib': 'Loading PPT library...',
+    'prog.pageCapture': 'Capturing page {n}/{total}...',
+    'msg.pdfErr': 'PDF error: {e}',
+    'msg.pptErr': 'PPT error: {e}',
   },
 };
 
