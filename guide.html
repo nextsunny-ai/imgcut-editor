@@ -56,6 +56,11 @@ code { font-family: var(--font-mono); background: var(--surface2); padding: 1px 
   position: sticky; top: 0; z-index: 10;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
+.brand-link {
+  text-decoration: none; color: inherit;
+}
+.brand-link:hover { opacity: 0.85; text-decoration: none; }
+.brand-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .brand-mark {
   width: 28px; height: 28px;
   background: var(--accent); color: #fff;
@@ -173,10 +178,10 @@ footer {
 <body>
 
 <header class="site-header">
-  <div class="brand">
+  <a class="brand brand-link" href="./index.html" aria-label="Home / 홈으로">
     <div class="brand-mark">SE</div>
     <div class="brand-text">SUNNY EDITOR</div>
-  </div>
+  </a>
   <div class="nav-right">
     <div class="lang-toggle" role="group" aria-label="Language">
       <button class="lang-btn" data-lang="ko" onclick="setLang('ko')">KO</button>

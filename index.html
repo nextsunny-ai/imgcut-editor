@@ -97,6 +97,16 @@ a:hover { text-decoration: underline; }
   z-index: 50;
 }
 .logo { display: flex; align-items: center; gap: 10px; }
+.logo-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.logo-link:hover { opacity: 0.85; }
+.logo-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .logo-mark {
   width: 28px; height: 28px;
   background: var(--accent);
@@ -1173,10 +1183,10 @@ a:hover { text-decoration: underline; }
 
 <!-- 헤더 -->
 <header class="header">
-  <div class="logo">
+  <button class="logo logo-link" type="button" onclick="goHome()" aria-label="Home / 홈으로">
     <div class="logo-mark">SE</div>
     <div class="logo-text">SUNNY EDITOR</div>
-  </div>
+  </button>
   <div class="header-actions">
     <div class="lang-toggle" role="group" aria-label="Language">
       <button class="lang-btn" data-lang="ko" onclick="setLang('ko')">KO</button>
@@ -2208,6 +2218,35 @@ function triggerActiveUpload() {
   if (m === 'html') document.getElementById('file-html-inp').click();
   else if (m === 'zip') document.getElementById('file-zip-inp').click();
   else if (m === 'folder') document.getElementById('file-folder-inp').click();
+}
+
+// 헤더 로고 클릭 = 홈으로 (= 글로벌 룰)
+function goHome() {
+  const hasWork = (typeof images !== 'undefined' && images && images.length) ||
+                  (typeof currentHtml !== 'undefined' && currentHtml);
+  if (hasWork) {
+    const msg = (typeof currentLang !== 'undefined' && currentLang === 'en')
+      ? 'Your current edits will be cleared. Go to home screen?'
+      : '편집 중인 내용이 사라집니다. 홈으로 이동할까요?';
+    if (!confirm(msg)) return;
+  }
+  // URL의 쿼리스트링·해시 정리 + 홈 화면으로 (= location.href = '/' 하면 페이지 새로고침이라 너무 무겁고 = 같은 페이지에서 reset만)
+  if (typeof resetAll === 'function') {
+    try { resetAll(); } catch (e) {}
+  }
+  // querystring 정리 (= ?sample=... 자국 제거)
+  if (location.search || location.hash) {
+    history.replaceState(null, '', location.pathname);
+  }
+  // 빈 화면 표시 + 에디터 영역 숨김
+  const empty = document.getElementById('empty-screen');
+  const editor = document.getElementById('editor-area');
+  if (empty) empty.style.display = 'flex';
+  if (editor) editor.style.display = 'none';
+  // 사이드바 file-info 숨김
+  const fi = document.getElementById('file-info');
+  if (fi) fi.classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function onFileDragOver(e) { e.preventDefault(); document.getElementById('file-dropzone').classList.add('drag-over'); }
