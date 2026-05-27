@@ -4664,6 +4664,14 @@ function initI18n() {
   if (typeof checkAutosaveOnLoad === 'function') {
     setTimeout(checkAutosaveOnLoad, 300);
   }
+  // ?sample=bakery|portfolio = 가이드에서 들어오면 자동 샘플 로드
+  try {
+    const params = new URLSearchParams(location.search);
+    const sample = params.get('sample');
+    if (sample && SAMPLE_MANIFEST && SAMPLE_MANIFEST[sample]) {
+      setTimeout(() => loadSample(sample), 500);
+    }
+  } catch (e) {}
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initI18n);
