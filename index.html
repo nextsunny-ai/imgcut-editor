@@ -500,10 +500,17 @@ a:hover { text-decoration: underline; }
 .size-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .size-edit-panel {
   display: none;
-  background: var(--surface2);
-  border: 1px solid var(--hairline);
-  padding: 10px;
-  margin-top: 6px;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  padding: 12px;
+  margin-top: 8px;
+  box-shadow: 0 6px 24px rgba(10,10,14,0.12);
+  position: relative;
+  z-index: 5;
+}
+.img-card.size-open {
+  border-color: var(--accent);
+  box-shadow: 0 6px 24px rgba(0,103,214,0.18);
 }
 .size-edit-inputs { display: flex; gap: 6px; margin-bottom: 6px; }
 .size-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
@@ -2746,8 +2753,14 @@ function toggleSizeEdit(i) {
   const card = document.getElementById('card-'+i);
   const isOpen = panel.style.display !== 'none';
   panel.style.display = isOpen ? 'none' : 'block';
-  // 패널 열릴 때 카드에 size-open 클래스 → 오버레이 숨김
-  if (card) card.classList.toggle('size-open', !isOpen);
+  // 패널 열릴 때 카드에 size-open 클래스 → 오버레이 숨김 + border 강조
+  if (card) {
+    card.classList.toggle('size-open', !isOpen);
+    // 패널이 화면 밖에 있으면 = 스크롤로 보이게
+    if (!isOpen) {
+      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
+  }
 }
 function switchTab(tab) {
   currentTab = tab;
@@ -3153,9 +3166,9 @@ async function renderGrid() {
         <div style="font-size:10px;color:var(--accent);font-weight:600;font-family:var(--font-mono);">${t('card.replaceNeeded')}</div>
       </div>` : ''}
       <div class="card-overlay">
-        <button class="card-action ca-replace" onclick="openCrop(${i})">${t('card.replace')}</button>
-        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})">${t('card.size')}</button>
-        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})">${t('card.delete')}</button>
+        <button class="card-action ca-replace" onclick="openCrop(${i})" title="${currentLang==='en'?'Replace with a new image':'새 이미지로 교체'}">${t('card.replace')}</button>
+        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})" title="${currentLang==='en'?'Edit image width/height (HTML attributes)':'이미지 가로·세로 크기 수정 (HTML width·height)'}">${t('card.size')}</button>
+        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})" title="${currentLang==='en'?'Mark this image for deletion':'이 이미지 삭제 표시'}">${t('card.delete')}</button>
       </div>
       <div class="card-badge badge-del">${t('card.deleted')}</div>
       <div class="card-badge badge-rep">${t('card.replaced')}</div>
