@@ -1750,23 +1750,12 @@ a:hover { text-decoration: underline; }
         </div>
       </div>
 
-      <!-- 미리보기 (= 새 이미지 크롭 결과) -->
-      <div class="preview-panel">
-        <div class="preview-panel-title" data-i18n="crop.preview">새 이미지 미리보기</div>
-        <div class="preview-boxes">
-          <div class="preview-box-item">
-            <div class="preview-box-label" data-i18n="crop.preview.wide">가로형</div>
-            <img class="preview-thumb" id="preview-wide" src="" alt="">
-          </div>
-          <div class="preview-box-item">
-            <div class="preview-box-label" data-i18n="crop.preview.sq">정사각형</div>
-            <img class="preview-thumb-sq" id="preview-sq" src="" alt="">
-          </div>
-          <div class="preview-box-item">
-            <div class="preview-box-label" data-i18n="crop.preview.orig">원본</div>
-            <img class="preview-thumb" id="preview-orig" src="" alt="" style="object-fit:contain;">
-          </div>
-        </div>
+      <!-- 미리보기 panel 폐기 (= 사용자 혼란 + 사고 잦음 + 캔버스에서 이미 시각 확인됨)
+           preview-wide/sq/orig = 옛 id로 = JS에서 참조하는데 = 안전상 hidden DOM 유지 -->
+      <div style="display:none;" aria-hidden="true">
+        <img id="preview-wide" alt="">
+        <img id="preview-sq" alt="">
+        <img id="preview-orig" alt="">
       </div>
 
     </div>
@@ -3482,7 +3471,7 @@ function openCrop(i) {
     const sizeStr = (sw || sh) ? `${sw||'auto'} × ${sh||'auto'}` : t('card.sizeAuto');
     curMeta.textContent = `#${i+1} · ${path} · ${sizeStr}`;
   }
-  // 미리보기 초기화 — 기존 thumb이 있으면 표시, 없으면 빈 영역
+  // 미리보기 박스 (= hidden DOM, 옛 호환만)
   ['preview-wide','preview-sq','preview-orig'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
