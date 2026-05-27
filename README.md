@@ -1,6 +1,8 @@
 # 써니에디터 / SUNNY EDITOR
 
-**v1.0** · 2026-05-27 · [sunnyeditor.com](https://sunnyeditor.com)
+**v1.1** · 2026-05-27 · [sunnyeditor.com](https://sunnyeditor.com)
+
+V1.1 신규 = HTML → **PDF / PPT** 다운로드 + **페이지 사이즈** 자동 리사이즈 (16:9 와이드·A4 등). AI가 만든 HTML 슬라이드를 = 그대로 발표용 파일로.
 
 완성된 HTML 페이지의 이미지·텍스트를 코드 한 줄 건드리지 않고 한 번에 편집합니다.
 Edit images and text in a finished HTML page — no code.
