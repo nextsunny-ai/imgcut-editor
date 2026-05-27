@@ -321,6 +321,22 @@ a:hover { text-decoration: underline; }
 }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--text); border-bottom: 2px solid var(--accent); font-weight: 600; }
+.tab-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+.tab.active .tab-count { background: var(--accent); color: #fff; }
+.tab-count[hidden] { display: none; }
 .tab-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 
 .filterbar {
@@ -1406,9 +1422,9 @@ a:hover { text-decoration: underline; }
 
       <!-- 탭바 -->
       <div class="tabbar">
-        <button class="tab active" id="tab-img" onclick="switchTab('img')" data-i18n="tab.image">이미지</button>
-        <button class="tab" id="tab-txt" onclick="switchTab('txt')" data-i18n="tab.text">텍스트</button>
-        <button class="tab" id="tab-preview" onclick="switchTab('preview')" data-i18n="tab.preview">미리보기</button>
+        <button class="tab active" id="tab-img" onclick="switchTab('img')"><span data-i18n="tab.image">이미지</span><span class="tab-count" id="tab-img-count" hidden></span></button>
+        <button class="tab" id="tab-txt" onclick="switchTab('txt')"><span data-i18n="tab.text">텍스트</span><span class="tab-count" id="tab-txt-count" hidden></span></button>
+        <button class="tab" id="tab-preview" onclick="switchTab('preview')"><span data-i18n="tab.preview">미리보기</span></button>
       </div>
 
       <!-- 필터바 (탭 아래 별도 줄) -->
@@ -2725,6 +2741,7 @@ function switchTab(tab) {
   });
   document.getElementById('img-filters').style.display = tab === 'img' ? 'flex' : 'none';
   document.getElementById('txt-filters').style.display = tab === 'txt' ? 'flex' : 'none';
+  if (typeof syncTabCounts === 'function') syncTabCounts();
   if (tab === 'preview') refreshPreview();
 }
 
@@ -3105,7 +3122,7 @@ async function renderGrid() {
     // 현재 크기 표시 텍스트
     const curW = img.styleW || img.attrW || '';
     const curH = img.styleH || img.attrH || '';
-    const sizeHint = curW || curH ? `${curW||'auto'} × ${curH||'auto'}` : '크기 미지정';
+    const sizeHint = curW || curH ? `${curW||'auto'} × ${curH||'auto'}` : t('card.sizeAuto');
     const parentHint = img.parentHeight ? `컨테이너 높이: ${img.parentHeight}` : '';
 
     const div = document.createElement('div');
@@ -3117,25 +3134,25 @@ async function renderGrid() {
         style="${isLocal && !thumb ? 'display:none' : ''}">
       ${isLocal && !thumb ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface2);padding:8px;gap:4px;">
         <div style="font-size:10px;color:var(--text3);text-align:center;word-break:break-all;line-height:1.4;font-family:var(--font-mono);">${img.src}</div>
-        <div style="font-size:10px;color:var(--accent);font-weight:600;font-family:var(--font-mono);">교체 필요</div>
+        <div style="font-size:10px;color:var(--accent);font-weight:600;font-family:var(--font-mono);">${t('card.replaceNeeded')}</div>
       </div>` : ''}
       <div class="card-overlay">
-        <button class="card-action ca-replace" onclick="openCrop(${i})">교체</button>
-        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})">크기</button>
-        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})">삭제</button>
+        <button class="card-action ca-replace" onclick="openCrop(${i})">${t('card.replace')}</button>
+        <button class="card-action ca-size" onclick="toggleSizeEdit(${i})">${t('card.size')}</button>
+        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})">${t('card.delete')}</button>
       </div>
-      <div class="card-badge badge-del">삭제됨</div>
-      <div class="card-badge badge-rep">교체됨</div>
+      <div class="card-badge badge-del">${t('card.deleted')}</div>
+      <div class="card-badge badge-rep">${t('card.replaced')}</div>
       <div class="card-num">#${i+1}</div>
       <div class="card-info">
         <div class="card-name" title="${img.name}">${img.name}</div>
         <div class="card-meta">
-          <span>${img.originalSrc ? img.originalSrc.split('/').pop() : isHttp ? '외부 URL' : isBlob ? '번들 자원' : isLocal ? img.src.split('/').pop() : (img.src.length/1024).toFixed(0)+' KB'}</span>
+          <span>${img.originalSrc ? img.originalSrc.split('/').pop() : isHttp ? t('card.externalUrl') : isBlob ? (currentLang==='en'?'Bundle asset':'번들 자원') : isLocal ? img.src.split('/').pop() : (img.src.length/1024).toFixed(0)+' KB'}</span>
           <span style="color:var(--text3);">· ${sizeHint}</span>
         </div>
         <div class="size-edit-panel" id="szpanel-${i}" style="display:none;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <span style="font-size:10px;font-weight:600;color:var(--text2);font-family:var(--font-mono);letter-spacing:0.04em;">HTML 원본 크기 수정</span>
+            <span style="font-size:10px;font-weight:600;color:var(--text2);font-family:var(--font-mono);letter-spacing:0.04em;">${currentLang==='en'?'Edit HTML source size':'HTML 원본 크기 수정'}</span>
             <button onclick="toggleSizeEdit(${i})" style="border:none;background:none;color:var(--text2);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;">×</button>
           </div>
           <div class="size-edit-inputs">
@@ -3788,7 +3805,20 @@ function syncStats() {
   setVal('s-deleted', d + td);
   setVal('s-replaced', r + te + rs);
   setVal('s-changed', d + r + te + td + rs);
+  syncTabCounts();
   scheduleAutosave();
+}
+
+// 탭 라벨 옆 카운트 갱신 (이미지 5 · 텍스트 19)
+function syncTabCounts() {
+  const setCount = (id, n) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (n > 0) { el.textContent = String(n); el.hidden = false; }
+    else { el.textContent = ''; el.hidden = true; }
+  };
+  setCount('tab-img-count', (typeof images !== 'undefined' && images) ? images.length : 0);
+  setCount('tab-txt-count', (typeof textNodes !== 'undefined' && textNodes) ? textNodes.length : 0);
 }
 
 // ════════════════════════════════════
