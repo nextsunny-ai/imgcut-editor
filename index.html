@@ -875,6 +875,53 @@ a:hover { text-decoration: underline; }
   flex: 1;
   overflow: hidden;
 }
+.current-img-panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 2px;
+}
+.current-img-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+.current-img-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.current-img-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
+  flex-shrink: 0;
+}
+.current-img-info {
+  min-width: 0;
+  flex: 1;
+}
+.current-img-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.current-img-meta {
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+}
+
 .upload-zone {
   border: 1px dashed var(--hairline-strong);
   background: var(--surface);
@@ -1629,12 +1676,24 @@ a:hover { text-decoration: underline; }
     </div>
     <div class="crop-body">
 
+      <!-- 현재 이미지 (= 갈음 대상) 정보 패널 -->
+      <div class="current-img-panel" id="current-img-panel">
+        <div class="current-img-label" data-i18n="crop.current">현재 이미지 (이걸 갈음)</div>
+        <div class="current-img-row">
+          <img class="current-img-thumb" id="current-img-thumb" alt="">
+          <div class="current-img-info">
+            <div class="current-img-name" id="current-img-name">—</div>
+            <div class="current-img-meta" id="current-img-meta">—</div>
+          </div>
+        </div>
+      </div>
+
       <!-- 업로드 존 -->
       <div class="upload-zone" id="upload-zone"
            ondragover="onImgDragOver(event)" ondragleave="onImgDragLeave(event)" ondrop="onImgDrop(event)"
            onclick="document.getElementById('file-img-inp').click()">
-        
-        <strong data-i18n="crop.upload">이미지 업로드</strong>
+
+        <strong data-i18n="crop.upload">새 이미지 업로드</strong>
         <span data-i18n="crop.upload.hint">클릭 또는 드래그 · PNG, JPG, WEBP</span>
       </div>
       <input type="file" id="file-img-inp" accept="image/*" style="display:none;" onchange="onImgFileChange(event)">
@@ -1672,9 +1731,9 @@ a:hover { text-decoration: underline; }
         </div>
       </div>
 
-      <!-- 미리보기 -->
+      <!-- 미리보기 (= 새 이미지 크롭 결과) -->
       <div class="preview-panel">
-        <div class="preview-panel-title" data-i18n="crop.preview">미리보기</div>
+        <div class="preview-panel-title" data-i18n="crop.preview">새 이미지 미리보기</div>
         <div class="preview-boxes">
           <div class="preview-box-item">
             <div class="preview-box-label" data-i18n="crop.preview.wide">가로형</div>
@@ -1847,7 +1906,7 @@ const I18N = {
     'crop.align.left': '⬅ 좌측',
     'crop.align.right': '➡ 우측',
     'crop.align.full': '전체',
-    'crop.preview': '미리보기',
+    'crop.preview': '새 이미지 미리보기',
     'crop.preview.wide': '가로형',
     'crop.preview.sq': '정사각형',
     'crop.preview.orig': '원본',
@@ -1940,6 +1999,8 @@ const I18N = {
     'st.willReplace': '교체 예정',
     'st.restore': '복원',
     'crop.title.num': '이미지 교체 — #{n}',
+    'crop.current': '현재 이미지 (이 이미지를 갈음)',
+    'crop.upload': '새 이미지 업로드',
     'msg.restored': '복구 완료',
     'msg.resetDone': '편집 내용 초기화됨 (파일은 유지)',
     'hdr.reset.tip': '편집 내용만 초기화 (불러온 파일은 유지)',
@@ -2034,7 +2095,7 @@ const I18N = {
     'crop.align.left': '⬅ Left',
     'crop.align.right': '➡ Right',
     'crop.align.full': 'Full',
-    'crop.preview': 'Preview',
+    'crop.preview': 'New image preview',
     'crop.preview.wide': 'Wide',
     'crop.preview.sq': 'Square',
     'crop.preview.orig': 'Original',
@@ -2127,6 +2188,8 @@ const I18N = {
     'st.willReplace': 'Replace pending',
     'st.restore': 'Restore',
     'crop.title.num': 'Replace image — #{n}',
+    'crop.current': 'Current image (this is being replaced)',
+    'crop.upload': 'Upload new image',
     'msg.restored': 'Restored',
     'msg.resetDone': 'Edits cleared (file kept)',
     'hdr.reset.tip': 'Reset edits only (loaded file is kept)',
@@ -3267,15 +3330,34 @@ function openCrop(i) {
   currentEditIdx = i;
   pendingDataUrl = null;
   cropImg = null;
-  document.getElementById('crop-modal-title').textContent = t('crop.title.num', {n: i+1});
+  const img = images[i];
+  // 타이틀 = "#N · 파일명"
+  const fileName = img.originalSrc ? img.originalSrc.split('/').pop() : (img.name || ('#'+(i+1)));
+  document.getElementById('crop-modal-title').textContent = t('crop.title.num', {n: i+1}) + ' · ' + fileName;
   document.getElementById('upload-zone').style.display = 'flex';
   document.getElementById('crop-editor').classList.remove('show');
   document.getElementById('btn-apply-crop').disabled = true;
   const skipBtn = document.getElementById('btn-skip-crop');
   if (skipBtn) skipBtn.disabled = true;
   document.getElementById('file-img-inp').value = '';
+  // ★ "현재 이미지" 패널 = 어느 이미지 갈고 있는지 명확히 표시
+  const curThumb = document.getElementById('current-img-thumb');
+  const curName = document.getElementById('current-img-name');
+  const curMeta = document.getElementById('current-img-meta');
+  const safeThumb = img.thumb || '';
+  if (curThumb) {
+    if (safeThumb) { curThumb.src = safeThumb; curThumb.style.display = 'block'; }
+    else { curThumb.removeAttribute('src'); curThumb.style.display = 'none'; }
+  }
+  if (curName) curName.textContent = img.name || ('#' + (i+1));
+  if (curMeta) {
+    const path = img.originalSrc || img.src || '';
+    const sw = img.styleW || img.attrW || '';
+    const sh = img.styleH || img.attrH || '';
+    const sizeStr = (sw || sh) ? `${sw||'auto'} × ${sh||'auto'}` : t('card.sizeAuto');
+    curMeta.textContent = `#${i+1} · ${path} · ${sizeStr}`;
+  }
   // 미리보기 초기화 — 기존 thumb이 있으면 표시, 없으면 빈 영역
-  const safeThumb = images[i].thumb || '';
   ['preview-wide','preview-sq','preview-orig'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
