@@ -1279,6 +1279,8 @@ a:hover { text-decoration: underline; }
     <button class="btn" id="btn-add-element" onclick="openAddElement()" disabled data-i18n="hdr.addEl">+ 요소 추가</button>
     <button class="btn" id="btn-share" onclick="openShare()" disabled data-i18n="hdr.share">공유 링크</button>
     <button class="btn" id="btn-zip" onclick="downloadZip()" disabled data-i18n="hdr.zip">ZIP</button>
+    <button class="btn" id="btn-pdf" onclick="downloadPdf()" disabled data-i18n="hdr.pdf">PDF</button>
+    <button class="btn" id="btn-ppt" onclick="downloadPpt()" disabled data-i18n="hdr.ppt">PPT</button>
     <button class="btn btn-primary" id="btn-download" onclick="downloadNew()" disabled data-i18n="hdr.download">다운로드</button>
     <button class="btn btn-ghost" id="btn-deploy-guide" onclick="openDeployGuide()" disabled data-i18n="hdr.deploy">배포 안내</button>
   </div>
@@ -1373,6 +1375,20 @@ a:hover { text-decoration: underline; }
       <div id="page-picker" style="display:none; margin-top: 12px;">
         <div class="sidebar-label" style="margin-bottom: 6px;" data-i18n="side.pagePicker">페이지 선택</div>
         <select id="page-select" onchange="switchPage(this.value)" class="ae-input" style="width:100%; padding:6px 8px; font-size:11px; font-family:var(--font-mono);"></select>
+      </div>
+
+      <!-- V1.1 — 페이지 사이즈 (PPT·PDF 출력 비율) -->
+      <div id="page-size-picker" style="margin-top: 12px;">
+        <div class="sidebar-label" style="margin-bottom: 6px;" data-i18n="side.pageSize">페이지 사이즈</div>
+        <select id="page-size-select" onchange="onPageSizeChange(this.value)" class="ae-input" style="width:100%; padding:6px 8px; font-size:11px; font-family:var(--font-mono);">
+          <option value="original" data-i18n="pageSize.original">원본</option>
+          <option value="169wide" data-i18n="pageSize.169wide">16:9 와이드 (1920×1080)</option>
+          <option value="169hd" data-i18n="pageSize.169hd">16:9 HD (1280×720)</option>
+          <option value="43" data-i18n="pageSize.43">4:3 (1024×768)</option>
+          <option value="916" data-i18n="pageSize.916">9:16 세로 (1080×1920)</option>
+          <option value="a4l" data-i18n="pageSize.a4l">A4 가로</option>
+          <option value="a4p" data-i18n="pageSize.a4p">A4 세로</option>
+        </select>
       </div>
     </div>
 
@@ -2010,6 +2026,26 @@ const I18N = {
     'msg.restored': '복구 완료',
     'msg.resetDone': '편집 내용 초기화됨 (파일은 유지)',
     'hdr.reset.tip': '편집 내용만 초기화 (불러온 파일은 유지)',
+    // V1.1 — PDF / PPT / 페이지 사이즈
+    'hdr.pdf': 'PDF',
+    'hdr.ppt': 'PPT',
+    'side.pageSize': '페이지 사이즈',
+    'pageSize.original': '원본',
+    'pageSize.169wide': '16:9 와이드 (1920×1080)',
+    'pageSize.169hd': '16:9 HD (1280×720)',
+    'pageSize.43': '4:3 (1024×768)',
+    'pageSize.916': '9:16 세로 (1080×1920)',
+    'pageSize.a4l': 'A4 가로',
+    'pageSize.a4p': 'A4 세로',
+    'msg.pdfReady': 'PDF 다운로드 완료',
+    'msg.pptReady': 'PPT 다운로드 완료 (슬라이드는 이미지 — 텍스트 편집 안 됨)',
+    'prog.pdf': 'PDF 생성 중...',
+    'prog.ppt': 'PPT 슬라이드 생성 중...',
+    'prog.pdfLib': 'PDF 라이브러리 로드 중...',
+    'prog.pptLib': 'PPT 라이브러리 로드 중...',
+    'prog.pageCapture': '페이지 캡처 중 {n}/{total}...',
+    'msg.pdfErr': 'PDF 생성 오류: {e}',
+    'msg.pptErr': 'PPT 생성 오류: {e}',
   },
   en: {
     // Header
@@ -2202,6 +2238,26 @@ const I18N = {
     'msg.restored': 'Restored',
     'msg.resetDone': 'Edits cleared (file kept)',
     'hdr.reset.tip': 'Reset edits only (loaded file is kept)',
+    // V1.1 — PDF / PPT / Page size
+    'hdr.pdf': 'PDF',
+    'hdr.ppt': 'PPT',
+    'side.pageSize': 'Page size',
+    'pageSize.original': 'Original',
+    'pageSize.169wide': '16:9 Wide (1920x1080)',
+    'pageSize.169hd': '16:9 HD (1280x720)',
+    'pageSize.43': '4:3 (1024x768)',
+    'pageSize.916': '9:16 Vertical (1080x1920)',
+    'pageSize.a4l': 'A4 Landscape',
+    'pageSize.a4p': 'A4 Portrait',
+    'msg.pdfReady': 'PDF downloaded',
+    'msg.pptReady': 'PPT downloaded (slides are images, text not editable)',
+    'prog.pdf': 'Building PDF...',
+    'prog.ppt': 'Building PPT slides...',
+    'prog.pdfLib': 'Loading PDF library...',
+    'prog.pptLib': 'Loading PPT library...',
+    'prog.pageCapture': 'Capturing page {n}/{total}...',
+    'msg.pdfErr': 'PDF error: {e}',
+    'msg.pptErr': 'PPT error: {e}',
   },
 };
 
@@ -3244,6 +3300,8 @@ async function processHtmlFile(file) {
   document.getElementById('btn-reset').disabled = false;
   document.getElementById('btn-share').disabled = false;
   document.getElementById('btn-zip').disabled = false;
+  document.getElementById('btn-pdf').disabled = false;
+  document.getElementById('btn-ppt').disabled = false;
   document.getElementById('btn-add-element').disabled = false;
   document.getElementById('btn-download').disabled = false;
   document.getElementById('btn-deploy-guide').disabled = false;
@@ -4770,6 +4828,275 @@ ${wordRows.filter(r => r.trim()).join('\n')}
     const text = (txtEdited[i] !== undefined ? txtEdited[i] : textNodes[i].original);
     srcHtml = srcHtml.split(marker).join(text);
   }
+
+// ════════════════════════════════════
+//  V1.1 — 페이지 사이즈 / PDF / PPT
+// ════════════════════════════════════
+
+// 현재 선택된 페이지 사이즈 (default = original = 원본 = 변경 X)
+let currentPageSize = "original";
+
+// 사이즈 프리셋 — 단위 = px @ 96dpi 기준
+const PAGE_SIZE_PRESETS = {
+  "original":  null,
+  "169wide":   { w: 1920, h: 1080, label: "16:9 Wide" },
+  "169hd":     { w: 1280, h: 720,  label: "16:9 HD" },
+  "43":        { w: 1024, h: 768,  label: "4:3" },
+  "916":       { w: 1080, h: 1920, label: "9:16 Vertical" },
+  "a4l":       { w: 1123, h: 794,  label: "A4 Landscape" },
+  "a4p":       { w: 794,  h: 1123, label: "A4 Portrait" },
+};
+
+// 페이지 사이즈 드롭다운 onchange
+function onPageSizeChange(val) {
+  currentPageSize = val || "original";
+  try { localStorage.setItem("swe.pageSize", currentPageSize); } catch (e) {}
+  if (typeof renderPreview === "function") {
+    try { renderPreview(); } catch (e) {}
+  }
+}
+
+// HTML 문자열에 페이지 사이즈 CSS 강제 적용
+function applyPageSizeToHtml(html, sizeKey) {
+  const preset = PAGE_SIZE_PRESETS[sizeKey];
+  if (!preset) return html;
+  const css = "\n<style id=\"sunny-pagesize-override\">\n"
+    + "  html, body {\n"
+    + "    width: " + preset.w + "px !important;\n"
+    + "    min-height: " + preset.h + "px !important;\n"
+    + "    margin: 0 auto !important;\n"
+    + "    overflow-x: hidden;\n"
+    + "    box-sizing: border-box;\n"
+    + "  }\n"
+    + "</style>\n";
+  if (/<\/head>/i.test(html)) {
+    return html.replace(/<\/head>/i, css + "</head>");
+  }
+  if (/<body[^>]*>/i.test(html)) {
+    return html.replace(/<body([^>]*)>/i, "<body$1>" + css);
+  }
+  return css + html;
+}
+
+// CDN 라이브러리 동적 로드 (= ensureJSZip 패턴)
+function loadScriptOnce(src, globalCheck) {
+  return new Promise(function (res, rej) {
+    if (globalCheck && window[globalCheck]) return res();
+    const existing = document.querySelector("script[data-sunny-cdn=\"" + src + "\"]");
+    if (existing) {
+      existing.addEventListener("load", function () { res(); });
+      existing.addEventListener("error", function () { rej(new Error("CDN load failed: " + src)); });
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = src;
+    s.dataset.sunnyCdn = src;
+    s.onload = function () { res(); };
+    s.onerror = function () { rej(new Error("CDN load failed: " + src)); };
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureHtml2Canvas() {
+  if (window.html2canvas) return;
+  await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js", "html2canvas");
+}
+
+async function ensureJsPdf() {
+  if (window.jspdf && window.jspdf.jsPDF) return;
+  await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", "jspdf");
+}
+
+async function ensurePptxGen() {
+  if (window.PptxGenJS) return;
+  await loadScriptOnce("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", "PptxGenJS");
+}
+
+// 페이지별 HTML 빌드 — V1.1-4 다중 페이지 지원
+async function buildPagesForExport() {
+  const pages = [];
+  if (siteBundle && siteBundle.htmlPaths && siteBundle.htmlPaths.length > 0) {
+    const activePath = siteBundle.htmlPath;
+    const activeHtml = await buildHtml();
+    pages.push({ path: activePath, html: activeHtml });
+    for (const p of siteBundle.htmlPaths) {
+      if (p === activePath) continue;
+      try {
+        const blob = siteBundle.files.get(p);
+        if (!blob) continue;
+        const text = await blob.text();
+        pages.push({ path: p, html: text });
+      } catch (e) {}
+    }
+  } else {
+    const html = await buildHtml();
+    pages.push({ path: currentFileName || "page.html", html: html });
+  }
+  return pages;
+}
+
+// HTML 문자열 → off-screen iframe → canvas 캡처
+async function captureHtmlToCanvas(html, sizeKey) {
+  await ensureHtml2Canvas();
+  const preset = PAGE_SIZE_PRESETS[sizeKey];
+  const width  = preset ? preset.w : 1280;
+  const height = preset ? preset.h : null;
+
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:fixed;left:-99999px;top:0;width:" + width + "px;height:auto;visibility:hidden;pointer-events:none;z-index:-1;";
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "width:" + width + "px;height:" + (height || 720) + "px;border:0;background:#fff;display:block;";
+  wrap.appendChild(iframe);
+  document.body.appendChild(wrap);
+
+  try {
+    const finalHtml = preset ? applyPageSizeToHtml(html, sizeKey) : html;
+    iframe.srcdoc = finalHtml;
+    await new Promise(function (res) {
+      iframe.addEventListener("load", function () { res(); }, { once: true });
+      setTimeout(res, 5000);
+    });
+    await new Promise(function (r) { setTimeout(r, 350); });
+    const doc = iframe.contentDocument;
+    if (!doc || !doc.body) throw new Error("iframe document empty");
+    const natH = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, height || 0);
+    iframe.style.height = natH + "px";
+    await new Promise(function (r) { setTimeout(r, 100); });
+    const canvas = await window.html2canvas(doc.body, {
+      width: width,
+      height: preset ? preset.h : natH,
+      windowWidth: width,
+      windowHeight: preset ? preset.h : natH,
+      backgroundColor: "#ffffff",
+      scale: 1,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+    });
+    return canvas;
+  } finally {
+    try { wrap.remove(); } catch (e) {}
+  }
+}
+
+// ─── PDF 다운로드 (V1.1-1, V1.1-4) ───
+async function downloadPdf() {
+  if (!currentHtml && !siteBundle) { toast(t("msg.noChanges")); return; }
+  showProg(t("prog.pdfLib"), 5); await tick();
+  try {
+    await ensureHtml2Canvas();
+    await ensureJsPdf();
+    const jsPDF = window.jspdf.jsPDF;
+
+    showProg(t("prog.pdf"), 15); await tick();
+    const pages = await buildPagesForExport();
+    const preset = PAGE_SIZE_PRESETS[currentPageSize];
+
+    let pdfW, pdfH, orientation;
+    if (preset) {
+      pdfW = preset.w; pdfH = preset.h;
+      orientation = pdfW >= pdfH ? "landscape" : "portrait";
+    } else {
+      pdfW = 1280; pdfH = 1810;
+      orientation = "portrait";
+    }
+    const pdf = new jsPDF({ orientation: orientation, unit: "px", format: [pdfW, pdfH], hotfixes: ["px_scaling"] });
+
+    for (let i = 0; i < pages.length; i++) {
+      setProg(t("prog.pageCapture", { n: i + 1, total: pages.length }), 20 + Math.round(70 * i / pages.length));
+      await tick();
+      const canvas = await captureHtmlToCanvas(pages[i].html, currentPageSize);
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
+      if (i > 0) pdf.addPage([pdfW, pdfH], orientation);
+      const cAspect = canvas.width / canvas.height;
+      const pAspect = pdfW / pdfH;
+      let drawW, drawH, x, y;
+      if (cAspect > pAspect) {
+        drawW = pdfW; drawH = pdfW / cAspect;
+        x = 0; y = (pdfH - drawH) / 2;
+      } else {
+        drawH = pdfH; drawW = pdfH * cAspect;
+        x = (pdfW - drawW) / 2; y = 0;
+      }
+      pdf.addImage(imgData, "JPEG", x, y, drawW, drawH);
+    }
+
+    setProg(t("prog.saving"), 95); await tick();
+    const base = (siteBundle ? (siteBundle.name || "site") : (currentFileName || "page")).replace(/\.html?$/i, "");
+    pdf.save(base + ".pdf");
+    setProg(t("prog.done"), 100); await tick(250);
+    toast(t("msg.pdfReady"));
+  } catch (e) {
+    console.error(e);
+    toast(t("msg.pdfErr", { e: e.message || String(e) }));
+  } finally { hideProg(); }
+}
+
+// ─── PPT 다운로드 (V1.1-3, V1.1-4) ───
+async function downloadPpt() {
+  if (!currentHtml && !siteBundle) { toast(t("msg.noChanges")); return; }
+  showProg(t("prog.pptLib"), 5); await tick();
+  try {
+    await ensureHtml2Canvas();
+    await ensurePptxGen();
+
+    showProg(t("prog.ppt"), 15); await tick();
+    const pages = await buildPagesForExport();
+    const preset = PAGE_SIZE_PRESETS[currentPageSize];
+
+    const pptx = new window.PptxGenJS();
+    let layoutW, layoutH;
+    if (preset) {
+      layoutW = (preset.w / preset.h) * 7.5;
+      layoutH = 7.5;
+      if (layoutW > 13.333) {
+        layoutH = 13.333 * (preset.h / preset.w);
+        layoutW = 13.333;
+      }
+    } else {
+      layoutW = 13.333; layoutH = 7.5;
+    }
+    pptx.defineLayout({ name: "SUNNY_V11", width: layoutW, height: layoutH });
+    pptx.layout = "SUNNY_V11";
+
+    for (let i = 0; i < pages.length; i++) {
+      setProg(t("prog.pageCapture", { n: i + 1, total: pages.length }), 20 + Math.round(65 * i / pages.length));
+      await tick();
+      const canvas = await captureHtmlToCanvas(pages[i].html, currentPageSize);
+      const imgData = canvas.toDataURL("image/png");
+      const slide = pptx.addSlide();
+      const cAspect = canvas.width / canvas.height;
+      const sAspect = layoutW / layoutH;
+      let drawW, drawH, x, y;
+      if (cAspect > sAspect) {
+        drawW = layoutW; drawH = layoutW / cAspect;
+        x = 0; y = (layoutH - drawH) / 2;
+      } else {
+        drawH = layoutH; drawW = layoutH * cAspect;
+        x = (layoutW - drawW) / 2; y = 0;
+      }
+      slide.addImage({ data: imgData, x: x, y: y, w: drawW, h: drawH });
+    }
+
+    setProg(t("prog.saving"), 95); await tick();
+    const base = (siteBundle ? (siteBundle.name || "site") : (currentFileName || "page")).replace(/\.html?$/i, "");
+    await pptx.writeFile({ fileName: base + ".pptx" });
+    setProg(t("prog.done"), 100); await tick(250);
+    toast(t("msg.pptReady"));
+  } catch (e) {
+    console.error(e);
+    toast(t("msg.pptErr", { e: e.message || String(e) }));
+  } finally { hideProg(); }
+}
+
+// localStorage 복구 (= 새 세션에서 직전 선택 유지)
+try {
+  const _swe_savedSize = localStorage.getItem("swe.pageSize");
+  if (_swe_savedSize && Object.prototype.hasOwnProperty.call(PAGE_SIZE_PRESETS, _swe_savedSize)) {
+    currentPageSize = _swe_savedSize;
+  }
+} catch (e) {}
+
 
 // ════════════════════════════════════
 //  공유
