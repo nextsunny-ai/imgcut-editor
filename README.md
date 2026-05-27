@@ -1,6 +1,6 @@
 # 써니에디터 / SUNNY EDITOR
 
-**v1.1** · 2026-05-26 · [sunnyeditor.com](https://sunnyeditor.com)
+**v1.0** · 2026-05-27 · [sunnyeditor.com](https://sunnyeditor.com)
 
 완성된 HTML 페이지의 이미지·텍스트를 코드 한 줄 건드리지 않고 한 번에 편집합니다.
 Edit images and text in a finished HTML page — no code.
@@ -42,7 +42,7 @@ No install. No signup. No server. Everything runs in your browser.
 - 변경사항 미리보기 (iframe) / Live preview
 - 한국어 / 영어 다국어 (브라우저 언어 자동 감지) / Korean / English (auto-detect)
 
-### V1.1 — 일반 웹사이트 처리
+### V1.0 — 일반 웹사이트 처리
 - **외부 CSS 자동 인라인** — `<link rel="stylesheet">` 따라가서 인라인 처리, 다운로드 시 원본 외부 파일로 복원
 - **상대경로 이미지 실제 미리보기** — `./images/logo.png` 같은 경로의 이미지를 그대로 표시·교체
 - **다중 HTML 페이지** — `index.html` + `about.html` + `contact.html` 같은 다페이지 사이트 ZIP에서 페이지 셀렉터로 전환 편집
