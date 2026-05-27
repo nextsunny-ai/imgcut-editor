@@ -1221,7 +1221,7 @@ a:hover { text-decoration: underline; }
       <span class="lang-sep">/</span>
       <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
     </div>
-    <button class="btn btn-ghost" id="btn-reset" onclick="resetAll()" disabled data-i18n="hdr.reset">초기화</button>
+    <button class="btn btn-ghost" id="btn-reset" onclick="resetAll()" disabled data-i18n="hdr.reset" data-i18n-title="hdr.reset.tip" title="편집 내용만 초기화 (파일은 유지)">초기화</button>
     <button class="btn" id="btn-add-element" onclick="openAddElement()" disabled data-i18n="hdr.addEl">+ 요소 추가</button>
     <button class="btn" id="btn-share" onclick="openShare()" disabled data-i18n="hdr.share">공유 링크</button>
     <button class="btn" id="btn-zip" onclick="downloadZip()" disabled data-i18n="hdr.zip">ZIP</button>
@@ -1934,6 +1934,8 @@ const I18N = {
     'st.restore': '복원',
     'crop.title.num': '이미지 교체 — #{n}',
     'msg.restored': '복구 완료',
+    'msg.resetDone': '편집 내용 초기화됨 (파일은 유지)',
+    'hdr.reset.tip': '편집 내용만 초기화 (불러온 파일은 유지)',
   },
   en: {
     // Header
@@ -2119,6 +2121,8 @@ const I18N = {
     'st.restore': 'Restore',
     'crop.title.num': 'Replace image — #{n}',
     'msg.restored': 'Restored',
+    'msg.resetDone': 'Edits cleared (file kept)',
+    'hdr.reset.tip': 'Reset edits only (loaded file is kept)',
   },
 };
 
@@ -2258,9 +2262,9 @@ function goHome() {
       : '편집 중인 내용이 사라집니다. 홈으로 이동할까요?';
     if (!confirm(msg)) return;
   }
-  // URL의 쿼리스트링·해시 정리 + 홈 화면으로 (= location.href = '/' 하면 페이지 새로고침이라 너무 무겁고 = 같은 페이지에서 reset만)
+  // 편집 내용 초기화 (= goHome 자체에서 이미 confirm 했음 = skipConfirm = true)
   if (typeof resetAll === 'function') {
-    try { resetAll(); } catch (e) {}
+    try { resetAll(true); } catch (e) {}
   }
   // querystring 정리 (= ?sample=... 자국 제거)
   if (location.search || location.hash) {
@@ -3740,31 +3744,49 @@ function applyAddElement() {
 }
 
 
-function resetAll() {
+function resetAll(skipConfirm) {
+  // 편집 사항 있을 때만 = 확인 다이얼로그 (= 사용자 실수 방지)
+  const hasEdits = deleted.size > 0 ||
+                   Object.keys(replaced).length > 0 ||
+                   (typeof txtEdited !== 'undefined' && Object.keys(txtEdited).length > 0) ||
+                   (typeof txtDeleted !== 'undefined' && txtDeleted.size > 0) ||
+                   (typeof resized !== 'undefined' && Object.keys(resized).length > 0) ||
+                   (typeof parentResized !== 'undefined' && Object.keys(parentResized).length > 0);
+  if (hasEdits && !skipConfirm) {
+    const msg = (typeof currentLang !== 'undefined' && currentLang === 'en')
+      ? 'All your edits (image replacements, text changes, deletions, resizing) will be cleared.\nThe loaded file stays as is.\n\nReset all edits?'
+      : '편집한 모든 내용(이미지 교체·텍스트 수정·삭제·크기 변경)이 사라집니다.\n불러온 파일 자체는 그대로 유지됩니다.\n\n편집 내용을 모두 초기화할까요?';
+    if (!confirm(msg)) return;
+  }
   deleted.clear();
   Object.keys(replaced).forEach(k => delete replaced[k]);
   images.forEach((img, i) => {
     const card = document.getElementById('card-' + i);
     if (!card) return;
     card.classList.remove('deleted', 'replaced');
-    document.getElementById('delbtn-' + i).textContent = t('card.delete');
-    document.getElementById('cst-' + i).textContent = '';
-    document.getElementById('thumb-' + i).src = img.thumb;
+    const delBtn = document.getElementById('delbtn-' + i);
+    if (delBtn) delBtn.textContent = t('card.delete');
+    const cst = document.getElementById('cst-' + i);
+    if (cst) cst.textContent = '';
+    const thumb = document.getElementById('thumb-' + i);
+    if (thumb) thumb.src = img.thumb;
   });
   // 텍스트 초기화
-  txtDeleted.clear();
-  Object.keys(txtEdited).forEach(k => delete txtEdited[k]);
-  textNodes.forEach((_, i) => {
-    const inp = document.getElementById('tinp-' + i);
-    if (inp) { inp.value = textNodes[i].original; inp.classList.remove('deleted-input'); }
-    const card = document.getElementById('tcard-' + i);
-    if (card) card.classList.remove('txt-edited', 'txt-deleted');
-    const st = document.getElementById('tst-' + i);
-    if (st) st.textContent = '';
-  });
+  if (typeof txtDeleted !== 'undefined') txtDeleted.clear();
+  if (typeof txtEdited !== 'undefined') Object.keys(txtEdited).forEach(k => delete txtEdited[k]);
+  if (typeof textNodes !== 'undefined') {
+    textNodes.forEach((_, i) => {
+      const inp = document.getElementById('tinp-' + i);
+      if (inp) { inp.value = textNodes[i].original; inp.classList.remove('deleted-input'); }
+      const card = document.getElementById('tcard-' + i);
+      if (card) card.classList.remove('txt-edited', 'txt-deleted');
+      const st = document.getElementById('tst-' + i);
+      if (st) st.textContent = '';
+    });
+  }
   // 크기 초기화
-  Object.keys(resized).forEach(k => delete resized[k]);
-  Object.keys(parentResized).forEach(k => delete parentResized[k]);
+  if (typeof resized !== 'undefined') Object.keys(resized).forEach(k => delete resized[k]);
+  if (typeof parentResized !== 'undefined') Object.keys(parentResized).forEach(k => delete parentResized[k]);
   images.forEach((_, i) => {
     const sw = document.getElementById('szw-'+i);
     const sh = document.getElementById('szh-'+i);
@@ -3774,7 +3796,7 @@ function resetAll() {
     if (note) note.textContent = '';
   });
   syncStats(); syncChangeList(); applyFilter();
-  toast('초기화 완료');
+  toast(t('msg.resetDone'));
 }
 
 // ════════════════════════════════════
