@@ -1761,7 +1761,6 @@ a:hover { text-decoration: underline; }
     </div>
     <div class="crop-footer">
       <button class="btn btn-ghost" onclick="closeCropModal()" data-i18n="crop.cancel">취소</button>
-      <button class="btn btn-ghost" id="btn-skip-crop" onclick="skipCrop()" data-i18n="crop.skip">원본 그대로 사용</button>
       <button class="btn btn-primary" id="btn-apply-crop" onclick="applyCrop()" disabled data-i18n="crop.apply">교체 적용</button>
     </div>
   </div>
@@ -1922,7 +1921,6 @@ const I18N = {
     'crop.preview.sq': '정사각형',
     'crop.preview.orig': '원본',
     'crop.cancel': '취소',
-    'crop.skip': '원본 그대로 사용',
     'crop.apply': '교체 적용',
     // 공유 모달
     'share.title': '공유 링크 생성',
@@ -2134,7 +2132,6 @@ const I18N = {
     'crop.preview.sq': 'Square',
     'crop.preview.orig': 'Original',
     'crop.cancel': 'Cancel',
-    'crop.skip': 'Use original',
     'crop.apply': 'Apply',
     // Share modal
     'share.title': 'Create share link',
@@ -3178,7 +3175,8 @@ async function processHtmlFile(file) {
   }
 
   // ② CSS background-image: url("...") 방식
-  const bgRegex = new RegExp('url\\(["\']?([^"\')]+\\.(?:jpg|jpeg|png|gif|webp|svg)(?:\\?[^"\')]*)?|data:image[^"\')]+|https?://[^"\')]+)["\']?\\)', 'gi');
+  // blob: = ZIP/폴더 모드에서 외부 CSS 인라인 시 url() → blob URL 변환 (= NORY 히어로 같은 케이스)
+  const bgRegex = new RegExp('url\\(["\']?(blob:[^"\')]+|[^"\')]+\\.(?:jpg|jpeg|png|gif|webp|svg|avif)(?:\\?[^"\')]*)?|data:image[^"\')]+|https?://[^"\')]+)["\']?\\)', 'gi');
   let bgM;
   while ((bgM = bgRegex.exec(text)) !== null) {
     const src = bgM[1];
@@ -3451,8 +3449,6 @@ function openCrop(i) {
   document.getElementById('upload-zone').style.display = 'flex';
   document.getElementById('crop-editor').classList.remove('show');
   document.getElementById('btn-apply-crop').disabled = true;
-  const skipBtn = document.getElementById('btn-skip-crop');
-  if (skipBtn) skipBtn.disabled = true;
   document.getElementById('file-img-inp').value = '';
   // ★ "현재 이미지" 패널 = 어느 이미지 갈고 있는지 명확히 표시
   const curThumb = document.getElementById('current-img-thumb');
@@ -3507,7 +3503,6 @@ function loadCropImage(file) {
       document.getElementById('upload-zone').style.display = 'none';
       document.getElementById('crop-editor').classList.add('show');
       document.getElementById('btn-apply-crop').disabled = false;
-      document.getElementById('btn-skip-crop').disabled = false;
       initCropCanvas();
     };
     img.src = url;
@@ -3740,12 +3735,6 @@ function getCroppedDataUrl() {
   // PNG 투명도 유지: 원본이 PNG면 PNG로 출력
   const isPng = pendingDataUrl && (pendingDataUrl.includes('data:image/png') || pendingDataUrl.toLowerCase().includes('.png'));
   return isPng ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.92);
-}
-
-function skipCrop() {
-  // 원본 그대로
-  applyImageToSlot(pendingDataUrl);
-  closeCropModal();
 }
 
 function applyCrop() {
