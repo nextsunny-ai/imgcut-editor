@@ -3191,9 +3191,12 @@ async function processHtmlFile(file) {
     });
   }
 
-  // 뒤에서부터 마커로 치환
+  // ★ matches = HTML 위치 순으로 정렬 (= 페이지 표시 순 = 사용자가 보는 #1, #2, #3 순서와 일치)
+  // 옛 사고: <img> 25개 다 push 후 url() 4개가 뒤에 박혀서 = 위치 순 X
+  matches.sort((a, b) => a.start - b.start);
+
+  // 뒤에서부터 마커로 치환 (= 인덱스 안 흔들림)
   let html = text;
-  // matches를 위치 기준으로 정렬 (뒤에서부터)
   const sortedMatches = [...matches].sort((a,b) => b.start - a.start);
   for (const match of sortedMatches) {
     const i = matches.indexOf(match);
