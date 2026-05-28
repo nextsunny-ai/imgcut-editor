@@ -2968,17 +2968,24 @@ function refreshPreviewWindow() {
 //  텍스트 노드 추출 (마커 방식)
 // ════════════════════════════════════
 function extractTextNodes(html) {
-  // 편집 가능한 태그: h1~h4, p, li, button, a, span, td, th, label
-  const TAG_RE = /<(h[1-4]|p|li|button|a|span|td|th|label|div)(\s[^>]*)?>([^<]{2,300})<\/\1>/gi;
+  // 편집 가능한 태그: h1~h4, p, li, button, a, span, td, th, label, div
+  // ★ inner = inline 태그 (em, strong, b, i, br, small, sub, sup, u, mark, s, q, code) 허용
+  //   옛 사고: [^<]{2,300} = inline 태그 만나면 매치 X → "Breathe. Move. <em>Belong.</em>" 누락
+  const INLINE_OK = '(?:em|strong|b|i|br|small|sub|sup|u|mark|s|q|code|cite|abbr|time)';
+  const innerPat = `(?:[^<>]|<${INLINE_OK}(?:\\s[^>]*)?\\s*/?>|</${INLINE_OK}>)+`;
+  const TAG_RE = new RegExp(`<(h[1-4]|p|li|button|a|span|td|th|label|div)(\\s[^>]*)?>(${innerPat})</\\1>`, 'gi');
   const found = [];
   const seen = new Set();
   let m;
   while ((m = TAG_RE.exec(html)) !== null) {
     const tag = m[1].toLowerCase();
     const inner = m[3].trim();
-    // 너무 짧거나, 스크립트/스타일 내부, 중복 제거
-    if (inner.length < 2) continue;
+    // 너무 짧거나, 빈 텍스트, 중복 제거
+    if (inner.length < 2 || inner.length > 500) continue;
     if (/^\s*$/.test(inner)) continue;
+    // inline 태그만 stripped 한 텍스트가 너무 짧으면 skip (e.g. <em></em>만 있는 경우)
+    const stripped = inner.replace(/<[^>]+>/g, '').trim();
+    if (stripped.length < 2) continue;
     if (seen.has(inner + tag)) continue;
     seen.add(inner + tag);
     found.push({
@@ -3144,6 +3151,8 @@ async function processHtmlFile(file) {
     if (/fonts\.|googleapis\.com\/css|cdn.*\.js/i.test(src)) continue;
     const before = text.slice(Math.max(0, m.index - 10), m.index);
     if (!/<img[^>]*$/.test(text.slice(Math.max(0, m.index - 200), m.index)) && !before.includes('<img')) continue;
+    // ★ 같은 src dedup (= 동일 파일이 여러 <img>에 쓰여도 한 카드만. 마커 박을 때 모든 위치 다 갈음)
+    if (matches.some(mm => mm.src === src)) continue;
     const imgTagStart = text.lastIndexOf('<img', m.index);
     const imgTagEnd = text.indexOf('>', m.index) + 1;
     const imgTagFull = imgTagStart >= 0 ? text.slice(imgTagStart, imgTagEnd) : '';
@@ -3211,6 +3220,24 @@ async function processHtmlFile(file) {
       html = html.slice(0, start) + `src="${marker}"` + html.slice(end);
     }
   }
+
+  // ★ dedup으로 빠진 같은 src의 추가 위치들도 마커로 갈음
+  // 예: A안 = crowd-color.webp가 외부 CSS hero 배경 + inline <img> + inline style 3곳 사용
+  // → matches에는 1개만 있고, 마커도 1곳만 박혔음
+  // → 사용자가 갈음 시 한 곳만 바뀜 → hero 배경 안 바뀌는 사고
+  // → 추가 위치 다 마커로 박아서 한 번에 모두 갈음
+  for (let i = 0; i < matches.length; i++) {
+    const m = matches[i];
+    const marker = `%%IMG_${i}%%`;
+    const src = m.src;
+    if (!src) continue;
+    const escSrc = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // <img src="X"> → src="MARKER" (이미 박힌 곳은 이미 마커라 정규식 안 잡힘)
+    html = html.replace(new RegExp(`src=["']${escSrc}["']`, 'g'), `src="${marker}"`);
+    // url("X") / url('X') / url(X) → url("MARKER")
+    html = html.replace(new RegExp(`url\\(\\s*["']?${escSrc}["']?\\s*\\)`, 'g'), `url("${marker}")`);
+  }
+
   currentHtml = html; // 마커가 들어간 템플릿 저장
 
   // 이름 자동 추출: 각 이미지 주변 HTML에서 alt / 섹션 제목 파악
