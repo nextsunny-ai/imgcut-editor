@@ -2991,7 +2991,8 @@ function extractTextNodes(html) {
     found.push({
       idx: found.length,
       tag,
-      original: inner,
+      original: inner,      // 원본 HTML (inline 태그 + style 포함)
+      display: stripped,     // ★ 사용자에게 보이는 깨끗한 텍스트 (= input value)
       fullMatch: m[0],
       matchIndex: m.index,
     });
@@ -3038,23 +3039,25 @@ function renderTextList() {
 
   list.innerHTML = textNodes.map((node, i) => {
     const { label, cls } = tagLabel(node.tag);
-    const preview = node.original.length > 80 ? node.original.slice(0,80)+'…' : node.original;
+    // ★ 깨끗한 텍스트만 표시 (= display) — HTML 태그 + style 속성 안 노출
+    const cleanText = node.display || node.original;
+    const preview = cleanText.length > 80 ? cleanText.slice(0,80)+'…' : cleanText;
     return `
     <div class="txt-card" id="tcard-${i}" data-tidx="${i}" data-tag="${node.tag}">
       <div class="txt-card-header">
         <span class="txt-type-badge ${cls}">${label}</span>
-        <span class="txt-card-path">${preview}</span>
+        <span class="txt-card-path">${escapeHtml(preview)}</span>
         <div class="txt-card-actions">
           <button class="txt-action" onclick="toggleOriginal(${i})">원본 보기</button>
           <button class="txt-action danger" id="tdelbtn-${i}" onclick="toggleTxtDelete(${i})">삭제</button>
         </div>
       </div>
       <div class="txt-card-body">
-        <div class="txt-original" id="torig-${i}">원본: ${node.original}</div>
+        <div class="txt-original" id="torig-${i}">원본: ${escapeHtml(node.original)}</div>
         <textarea class="txt-input" id="tinp-${i}"
           oninput="onTxtInput(${i})"
           placeholder="텍스트를 수정하세요..."
-          rows="${node.original.length > 60 ? 3 : 1}">${node.original}</textarea>
+          rows="${cleanText.length > 60 ? 3 : 1}">${escapeHtml(cleanText)}</textarea>
         <div class="txt-status" id="tst-${i}"></div>
       </div>
     </div>`;
@@ -3068,7 +3071,9 @@ function onTxtInput(i) {
   const val = document.getElementById('tinp-'+i).value;
   const card = document.getElementById('tcard-'+i);
   const st = document.getElementById('tst-'+i);
-  if (val === textNodes[i].original) {
+  // ★ display (= 깨끗한 텍스트)와 비교. 사용자 수정 안 했으면 = original HTML 보존
+  const cleanText = textNodes[i].display || textNodes[i].original;
+  if (val === cleanText) {
     delete txtEdited[i];
     card.classList.remove('txt-edited');
     st.textContent = ''; st.className = 'txt-status';
@@ -3993,7 +3998,7 @@ function resetAll(skipConfirm) {
   if (typeof textNodes !== 'undefined') {
     textNodes.forEach((_, i) => {
       const inp = document.getElementById('tinp-' + i);
-      if (inp) { inp.value = textNodes[i].original; inp.classList.remove('deleted-input'); }
+      if (inp) { inp.value = textNodes[i].display || textNodes[i].original; inp.classList.remove('deleted-input'); }
       const card = document.getElementById('tcard-' + i);
       if (card) card.classList.remove('txt-edited', 'txt-deleted');
       const st = document.getElementById('tst-' + i);
@@ -4326,7 +4331,7 @@ function undoParentResize(i) {
 function undoTxtEdit(i) {
   delete txtEdited[i];
   const inp = document.getElementById('tinp-'+i);
-  if (inp) inp.value = textNodes[i].original;
+  if (inp) inp.value = textNodes[i].display || textNodes[i].original;
   const card = document.getElementById('tcard-'+i);
   if (card) card.classList.remove('txt-edited');
   const st = document.getElementById('tst-'+i);
