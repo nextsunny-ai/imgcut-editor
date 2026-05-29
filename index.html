@@ -1518,6 +1518,7 @@ a:hover { text-decoration: underline; }
       <div class="tabbar">
         <button class="tab active" id="tab-img" onclick="switchTab('img')"><span data-i18n="tab.image">이미지</span><span class="tab-count" id="tab-img-count" hidden></span></button>
         <button class="tab" id="tab-txt" onclick="switchTab('txt')"><span data-i18n="tab.text">텍스트</span><span class="tab-count" id="tab-txt-count" hidden></span></button>
+        <button class="tab" id="tab-tone" onclick="switchTab('tone')"><span data-i18n="tab.tone">디자인 톤</span></button>
         <button class="tab" id="tab-preview" onclick="switchTab('preview')"><span data-i18n="tab.preview">미리보기</span></button>
       </div>
 
@@ -1550,6 +1551,19 @@ a:hover { text-decoration: underline; }
       <div class="tab-panel" id="panel-txt" style="display:none;">
         <div class="grid-wrap">
           <div class="txt-list" id="txt-list"></div>
+        </div>
+      </div>
+
+      <!-- 디자인 톤 탭 패널 -->
+      <div class="tab-panel" id="panel-tone" style="display:none; flex:1; flex-direction:column; padding: 16px 20px; overflow: auto;">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;" data-i18n="tone.note">페이지의 컬러·폰트를 한 번에 갈음. 모든 위치 자동 반영.</div>
+        <div id="tone-empty" style="text-align:center;color:var(--text3);padding:40px 20px;display:none;" data-i18n="tone.empty">감지된 컬러·폰트가 없습니다.</div>
+        <div id="tone-content">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:8px;" data-i18n="tone.colors">컬러</div>
+          <div id="tone-color-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:8px;" data-i18n="tone.fonts">폰트</div>
+          <div id="tone-font-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+          <button class="btn btn-ghost btn-sm" onclick="resetTone()" style="margin-top:8px;" data-i18n="tone.reset">초기화</button>
         </div>
       </div>
 
@@ -1935,6 +1949,12 @@ const I18N = {
     'crop.cancel': '취소',
     'crop.apply': '교체 적용',
     'card.effect': '효과',
+    'tab.tone': '디자인 톤',
+    'tone.note': '페이지의 컬러·폰트를 한 번에 갈음. 모든 위치 자동 반영.',
+    'tone.colors': '컬러',
+    'tone.fonts': '폰트',
+    'tone.reset': '톤 초기화',
+    'tone.empty': '감지된 컬러·폰트가 없습니다.',
     // 공유 모달
     'share.title': '공유 링크 생성',
     'share.sub': '변경사항이 적용된 HTML을 공유할 방법을 선택하세요',
@@ -2147,6 +2167,12 @@ const I18N = {
     'crop.cancel': 'Cancel',
     'crop.apply': 'Apply',
     'card.effect': 'Effect',
+    'tab.tone': 'Design tone',
+    'tone.note': 'Change page colors/fonts in bulk. Auto-applied everywhere.',
+    'tone.colors': 'Colors',
+    'tone.fonts': 'Fonts',
+    'tone.reset': 'Reset tone',
+    'tone.empty': 'No detected colors or fonts.',
     // Share modal
     'share.title': 'Create share link',
     'share.sub': 'Choose how to share the edited HTML',
@@ -2343,6 +2369,13 @@ let parentResized = {};   // idx → new height string ('auto' or px value)
 // effects[i] = { brightness: 100, contrast: 100, blur: 0, saturate: 100 }
 // 기본값(100,100,0,100) = 효과 없음
 let effects = {};
+
+// ★ V1.2 = 디자인 톤 (컬러·폰트 전체 변경)
+// detectedColors = [{ name, original, current }, ...] = CSS 변수 또는 자주 쓰인 hex
+// detectedFonts = [{ name, original, current }, ...] = font-family
+let detectedColors = [];
+let detectedFonts = [];
+let toneChanges = { colors: {}, fonts: {} };  // 사용자 변경 사항
 
 // ── 크롭 상태 ──
 let cropImg = null;
@@ -2975,15 +3008,194 @@ function effectsToCss(e) {
   // ★ 항상 4가지 모두 출력 = 옛 CSS 디자인 효과 override (NORY CITY 같은 케이스)
   return `brightness(${e.brightness/100}) contrast(${e.contrast/100}) blur(${e.blur}px) saturate(${e.saturate/100})`;
 }
+
+// ★ V1.2 = 디자인 톤 패널 렌더 + 이벤트
+function renderTonePanel() {
+  const cList = document.getElementById('tone-color-list');
+  const fList = document.getElementById('tone-font-list');
+  const empty = document.getElementById('tone-empty');
+  const content = document.getElementById('tone-content');
+  if (!cList || !fList) return;
+  if (!detectedColors.length && !detectedFonts.length) {
+    if (empty) empty.style.display = 'block';
+    if (content) content.style.display = 'none';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (content) content.style.display = 'block';
+
+  // 컬러
+  cList.innerHTML = detectedColors.map((c, i) => {
+    // input[type=color]에 박을 수 있는 hex로 변환 (rgb·hsl은 임시로 #888)
+    const hexVal = /^#[0-9a-fA-F]{6}/.test(c.current) ? c.current.slice(0, 7) : '#888888';
+    return `
+    <div style="display:grid;grid-template-columns:32px 1fr 90px 80px;gap:10px;align-items:center;padding:8px;border:1px solid var(--border);border-radius:6px;">
+      <input type="color" value="${hexVal}" oninput="onToneColorChange(${i}, this.value)" style="width:32px;height:32px;border:none;cursor:pointer;background:none;padding:0;">
+      <div>
+        <div style="font-size:12px;font-family:var(--font-mono);color:var(--text);" title="${escapeHtml(c.name)}">${escapeHtml(c.name.length > 30 ? c.name.slice(0,30)+'…' : c.name)}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);">${escapeHtml(c.original)}${c.count ? ' ('+c.count+'곳)' : ''}</div>
+      </div>
+      <input type="text" value="${escapeHtml(c.current)}" oninput="onToneColorChange(${i}, this.value)" style="font-size:11px;font-family:var(--font-mono);padding:4px 6px;border:1px solid var(--border);border-radius:4px;">
+      <button class="btn btn-ghost btn-sm" onclick="resetToneColor(${i})" style="font-size:10px;padding:2px 6px;">초기화</button>
+    </div>`;
+  }).join('');
+
+  // 폰트
+  fList.innerHTML = detectedFonts.map((f, i) => `
+    <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:10px;align-items:center;padding:8px;border:1px solid var(--border);border-radius:6px;">
+      <div>
+        <div style="font-size:12px;color:var(--text);font-family:'${escapeHtml(f.original)}', sans-serif;">${escapeHtml(f.original)}</div>
+        <div style="font-size:10px;color:var(--text3);">${f.count ? f.count+'곳' : ''}</div>
+      </div>
+      <input type="text" value="${escapeHtml(f.current)}" placeholder="예: Pretendard" oninput="onToneFontChange(${i}, this.value)" style="font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;">
+      <button class="btn btn-ghost btn-sm" onclick="resetToneFont(${i})" style="font-size:10px;padding:2px 6px;">초기화</button>
+    </div>
+  `).join('');
+}
+
+let toneDebounceTimer = null;
+function onToneColorChange(i, val) {
+  if (!detectedColors[i]) return;
+  detectedColors[i].current = val;
+  toneDebouncedRefresh();
+}
+function onToneFontChange(i, val) {
+  if (!detectedFonts[i]) return;
+  detectedFonts[i].current = val;
+  toneDebouncedRefresh();
+}
+function resetToneColor(i) {
+  if (!detectedColors[i]) return;
+  detectedColors[i].current = detectedColors[i].original;
+  renderTonePanel();
+  toneDebouncedRefresh();
+}
+function resetToneFont(i) {
+  if (!detectedFonts[i]) return;
+  detectedFonts[i].current = detectedFonts[i].original;
+  renderTonePanel();
+  toneDebouncedRefresh();
+}
+function resetTone() {
+  detectedColors.forEach(c => c.current = c.original);
+  detectedFonts.forEach(f => f.current = f.original);
+  renderTonePanel();
+  toneDebouncedRefresh();
+}
+function toneDebouncedRefresh() {
+  syncStats(); syncChangeList();
+  if (toneDebounceTimer) clearTimeout(toneDebounceTimer);
+  toneDebounceTimer = setTimeout(() => {
+    if (typeof refreshPreview === 'function') refreshPreview();
+    if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
+  }, 300);
+}
+
+// ════════════════════════════════════
+//  V1.2 = 디자인 톤 (컬러·폰트 자동 감지 + 일괄 변경)
+// ════════════════════════════════════
+function detectDesignTone(html) {
+  const colors = [];
+  const fonts = [];
+  const seenC = new Set();
+  const seenF = new Set();
+
+  // ① CSS 변수 컬러 = :root { --name: #hex } 또는 어떤 selector { --name: rgb(...) }
+  const cssVarRe = /(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\))\s*[;}]/g;
+  let m;
+  while ((m = cssVarRe.exec(html)) !== null) {
+    const name = m[1];
+    const val = m[2].trim();
+    const key = name + '::' + val;
+    if (seenC.has(key)) continue;
+    seenC.add(key);
+    // 컬러 같이 보이는지 검증 (= 색이 아닌 변수 제외)
+    if (!/^(#|rgb|hsl)/.test(val)) continue;
+    colors.push({ name, original: val, current: val, isVar: true });
+  }
+
+  // ② 직접 hex 색 (= 변수 없을 때) — 자주 쓰인 상위 추가
+  if (colors.length < 4) {
+    const hexCount = {};
+    const hexRe = /#[0-9a-fA-F]{6}\b/g;
+    while ((m = hexRe.exec(html)) !== null) {
+      const hex = m[0].toLowerCase();
+      hexCount[hex] = (hexCount[hex] || 0) + 1;
+    }
+    const topHex = Object.entries(hexCount)
+      .sort((a, b) => b[1] - a[1])
+      .filter(([h]) => !colors.some(c => c.original.toLowerCase() === h))
+      .slice(0, 8 - colors.length);
+    topHex.forEach(([hex, cnt]) => {
+      colors.push({ name: `색 ${hex}`, original: hex, current: hex, isVar: false, count: cnt });
+    });
+  }
+
+  // ③ 폰트 = font-family 자주 쓰인 거 추출
+  const fontCount = {};
+  const fontRe = /font-family\s*:\s*([^;{}]+)/g;
+  while ((m = fontRe.exec(html)) !== null) {
+    const raw = m[1].trim().replace(/['"!]/g, '').replace(/\s*,.*$/, '').trim();
+    if (!raw || raw.length > 50) continue;
+    if (/var\(|inherit|initial|unset/.test(raw)) continue;
+    fontCount[raw] = (fontCount[raw] || 0) + 1;
+  }
+  const topFonts = Object.entries(fontCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  topFonts.forEach(([name, cnt]) => {
+    fonts.push({ name: name, original: name, current: name, count: cnt });
+  });
+
+  return { colors, fonts };
+}
+
+function applyDesignTone(html) {
+  if (!detectedColors.length && !detectedFonts.length) return html;
+  let out = html;
+
+  // ① 컬러 변경
+  detectedColors.forEach(c => {
+    if (c.current === c.original) return;
+    if (c.isVar) {
+      // CSS 변수 = 변수 값 갈음
+      const escName = c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escVal = c.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      out = out.replace(new RegExp(`(${escName}\\s*:\\s*)${escVal}`, 'g'), `$1${c.current}`);
+    } else {
+      // 직접 hex = 모든 위치 갈음
+      out = out.split(c.original).join(c.current);
+      // 대소문자 변형도
+      const origLower = c.original.toLowerCase();
+      const origUpper = c.original.toUpperCase();
+      if (origLower !== c.original) out = out.split(origLower).join(c.current);
+      if (origUpper !== c.original) out = out.split(origUpper).join(c.current);
+    }
+  });
+
+  // ② 폰트 변경 = font-family 값 갈음
+  detectedFonts.forEach(f => {
+    if (f.current === f.original) return;
+    const escOrig = f.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // font-family: "옛"... 또는 font-family: 옛, ... 패턴
+    out = out.replace(new RegExp(`(font-family\\s*:\\s*['"]?)${escOrig}(['"]?)`, 'g'), `$1${f.current}$2`);
+  });
+
+  return out;
+}
+
 function switchTab(tab) {
   currentTab = tab;
-  ['img','txt','preview'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
-    document.getElementById('panel-'+t).style.display = t === tab ? 'flex' : 'none';
+  ['img','txt','tone','preview'].forEach(t => {
+    const tabEl = document.getElementById('tab-'+t);
+    const panelEl = document.getElementById('panel-'+t);
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
+    if (panelEl) panelEl.style.display = t === tab ? 'flex' : 'none';
   });
   document.getElementById('img-filters').style.display = tab === 'img' ? 'flex' : 'none';
   document.getElementById('txt-filters').style.display = tab === 'txt' ? 'flex' : 'none';
   if (typeof syncTabCounts === 'function') syncTabCounts();
+  if (tab === 'tone') renderTonePanel();
   if (tab === 'preview') refreshPreview();
 }
 
@@ -3331,6 +3543,10 @@ async function processHtmlFile(file) {
   //   → step 2 제거 (= 자리별 마커만 = step 1 결과 그대로)
 
   currentHtml = html; // 마커가 들어간 템플릿 저장
+  // ★ V1.2 = 디자인 톤 자동 감지 (= 컬러·폰트)
+  const tone = detectDesignTone(html);
+  detectedColors = tone.colors;
+  detectedFonts = tone.fonts;
 
   // 이름 자동 추출: 각 이미지 주변 HTML에서 alt / 섹션 제목 파악
   function extractName(idx) {
@@ -4245,6 +4461,8 @@ async function autosaveNow() {
       resized: {...(typeof resized !== 'undefined' ? resized : {})},
       parentResized: {...(typeof parentResized !== 'undefined' ? parentResized : {})},
       effects: {...(typeof effects !== 'undefined' ? effects : {})},  // ★ 이미지 효과 (밝기·대비·흐림·채도)
+      detectedColors: [...(typeof detectedColors !== 'undefined' ? detectedColors : [])],  // ★ V1.2 디자인 톤
+      detectedFonts: [...(typeof detectedFonts !== 'undefined' ? detectedFonts : [])],
     };
     const tx = db.transaction(AUTOSAVE_STORE, 'readwrite');
     tx.objectStore(AUTOSAVE_STORE).put(snapshot, AUTOSAVE_KEY);
@@ -4353,6 +4571,13 @@ async function restoreAutosave(snap) {
     if (typeof effects !== 'undefined') {
       Object.keys(effects).forEach(k => delete effects[k]);
       Object.assign(effects, snap.effects || {});
+    }
+    // ★ V1.2 = 디자인 톤 복구
+    if (typeof detectedColors !== 'undefined' && Array.isArray(snap.detectedColors)) {
+      detectedColors = snap.detectedColors;
+    }
+    if (typeof detectedFonts !== 'undefined' && Array.isArray(snap.detectedFonts)) {
+      detectedFonts = snap.detectedFonts;
     }
     // UI 다시 그리기
     await renderGrid();
@@ -4583,6 +4808,8 @@ async function buildHtml() {
       html = html.split(marker).join(textNodes[i].original);
     }
   }
+  // ★ V1.2 = 디자인 톤 적용 (= 컬러·폰트 일괄 갈음)
+  html = applyDesignTone(html);
   return html;
 }
 
