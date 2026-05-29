@@ -3310,11 +3310,26 @@ async function refreshPreview() {
 }
 
 // 새 창 열기 (= 보면서 갈아끼우기)
+// 새 창용 floating 새로고침 버튼 + 자동 갱신 표시
+// 주의: 끝닫기 태그 박으면 외부 스크립트 끝으로 인식 = JS 끊김. 분리 박음.
+const PREVIEW_FLOATING_HTML = '<div id="__se_preview_toolbar" style="position:fixed;top:14px;right:14px;z-index:2147483647;font-family:system-ui,sans-serif;font-size:13px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto;">'
+  + '<button onclick="location.reload()" title="새로고침" style="background:#0a66d7;color:#fff;border:none;padding:10px 16px;border-radius:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-weight:600;font-size:13px;">↻ 새로고침</button>'
+  + '<div id="__se_preview_pulse" style="opacity:0;transition:opacity 0.4s;background:rgba(34,197,94,0.95);color:#fff;padding:6px 14px;border-radius:14px;font-size:11px;font-weight:600;box-shadow:0 3px 10px rgba(0,0,0,0.2);">자동 갱신됨 ✓</div>'
+  + '</div>'
+  + '<scr' + 'ipt>(function(){window.addEventListener("load",function(){var el=document.getElementById("__se_preview_pulse");if(!el)return;setTimeout(function(){el.style.opacity="1";setTimeout(function(){el.style.opacity="0";},1200);},250);});})();</scr' + 'ipt>';
+
+function addPreviewToolbar(html) {
+  // </body> 직전에 박기. 없으면 끝에 추가.
+  if (html.includes('</body>')) return html.replace('</body>', PREVIEW_FLOATING_HTML + '</body>');
+  return html + PREVIEW_FLOATING_HTML;
+}
+
 async function openPreviewWindow() {
   try {
     if (!currentHtml) { toast(t('msg.noFileLoaded') || '먼저 파일을 불러오세요'); return; }
     showProg(t('prog.previewMaking'), 40); await tick();
-    const html = await buildHtml();
+    let html = await buildHtml();
+    html = addPreviewToolbar(html);  // ★ 새 창용 floating 버튼 박기
     setProg('렌더링 중...', 80); await tick();
     const blob = new Blob([html], {type:'text/html;charset=utf-8'});
     const url = URL.createObjectURL(blob);
@@ -3349,7 +3364,8 @@ function refreshPreviewWindow() {
   if (previewWindowTimer) clearTimeout(previewWindowTimer);
   previewWindowTimer = setTimeout(async () => {
     try {
-      const html = await buildHtml();
+      let html = await buildHtml();
+      html = addPreviewToolbar(html);  // ★ 새 창용 floating 버튼 박기
       const blob = new Blob([html], {type:'text/html;charset=utf-8'});
       const url = URL.createObjectURL(blob);
       if (previewWindow && !previewWindow.closed) {
