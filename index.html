@@ -4864,9 +4864,25 @@ async function buildHtml() {
     html = html.slice(0, absPos) + newStyleTag + html.slice(styleEnd);
   }
 
-  // ③ 이미지 마커 → 실제 src 치환
+  // ③ 이미지 마커 → 실제 src 치환 + 효과 박기
+  // ★ effects 박기 = 마커 갈음 전에 박음 (= dataURL 매치 사고 방지)
+  //   마커는 짧고 단순 string이라 정규식 안전. dataURL은 base64 special char로 매치 사고.
   for (let i = 0; i < images.length; i++) {
     const marker = '%%IMG_' + i + '%%';
+    // effects 박기 = 마커 갈음 전에. <img>만 (background-image는 부모 전체 영향 = 제외)
+    if (!images[i].isBg && effects[i]) {
+      const filterCss = effectsToCss(effects[i]);
+      if (filterCss) {
+        // <img...src="MARKER"...> 검색 → src="MARKER" 유지 + style filter 박기
+        const markerEsc = marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        html = html.replace(new RegExp(`(<img[^>]*src=["']${markerEsc}["'][^>]*?)(\\s*/?>)`, 'g'), (full, before, end) => {
+          if (/style\s*=/.test(before)) {
+            return before.replace(/style\s*=\s*(['"])([^'"]*)\1/, (s, q, val) => `style=${q}${val};filter:${filterCss}${q}`) + end;
+          }
+          return before + ` style="filter:${filterCss}"` + end;
+        });
+      }
+    }
     const newSrc = deleted.has(i) ? BLANK : (replaced[i] || images[i].src);
     if (images[i].isBg) {
       // background-image: url(마커) → url(newSrc)
@@ -4876,28 +4892,7 @@ async function buildHtml() {
     } else {
       html = html.split(marker).join(newSrc);
     }
-    // ★ 이미지 효과 (밝기·대비·흐림·채도) 박기 — <img> 태그만
-    if (!images[i].isBg && effects[i]) {
-      const filterCss = effectsToCss(effects[i]);
-      if (filterCss) {
-        // 해당 <img>가 가진 src=newSrc 위치 찾아서 style="filter:..." 박음
-        // 새 src로 갈음 후이므로 src="newSrc" 검색
-        const escSrc = newSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // 이미 style 있으면 append, 없으면 새로 추가
-        html = html.replace(new RegExp(`(<img[^>]*src=["']${escSrc}["'][^>]*?)(\\s*/?>)`, 'g'), (full, before, end) => {
-          // 같은 src가 여러 곳에 박혀있을 수 있으므로 = 한 번만 (= 이 i번째 마커가 박힌 그 위치)
-          // 단순화: 모든 같은 src에 효과 적용. (대표님 의도 = 자리별이지만 src 같으면 보통 같은 의도)
-          if (before.includes('data-eff-applied')) return full;
-          if (/style\s*=/.test(before)) {
-            return before.replace(/style\s*=\s*(['"])([^'"]*)\1/, (s, q, val) => `style=${q}${val};filter:${filterCss}${q}`) + ' data-eff-applied="1"' + end;
-          }
-          return before + ` style="filter:${filterCss}" data-eff-applied="1"` + end;
-        });
-      }
-    }
   }
-  // data-eff-applied 정리
-  html = html.replace(/\s*data-eff-applied=["']1["']/g, '');
 
   // ④ 텍스트 마커 치환
   for (let i = 0; i < textNodes.length; i++) {
