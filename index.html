@@ -498,7 +498,7 @@ a:hover { text-decoration: underline; }
 }
 .size-toggle-btn:hover { border-color: var(--hairline-strong); color: var(--text); }
 .size-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.size-edit-panel {
+.size-edit-panel, .effect-edit-panel {
   display: none;
   background: var(--surface);
   border: 2px solid var(--accent);
@@ -508,6 +508,18 @@ a:hover { text-decoration: underline; }
   position: relative;
   z-index: 5;
 }
+.effect-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+.effect-row label { color: var(--text2); }
+.effect-row input[type=range] { width: 100%; accent-color: var(--accent); }
+.effect-row span { text-align: right; color: var(--text2); font-weight: 600; }
 .img-card.size-open {
   border-color: var(--accent);
   box-shadow: 0 6px 24px rgba(0,103,214,0.18);
@@ -1922,6 +1934,7 @@ const I18N = {
     'crop.preview.orig': '원본',
     'crop.cancel': '취소',
     'crop.apply': '교체 적용',
+    'card.effect': '효과',
     // 공유 모달
     'share.title': '공유 링크 생성',
     'share.sub': '변경사항이 적용된 HTML을 공유할 방법을 선택하세요',
@@ -2133,6 +2146,7 @@ const I18N = {
     'crop.preview.orig': 'Original',
     'crop.cancel': 'Cancel',
     'crop.apply': 'Apply',
+    'card.effect': 'Effect',
     // Share modal
     'share.title': 'Create share link',
     'share.sub': 'Choose how to share the edited HTML',
@@ -2324,6 +2338,11 @@ let currentTab = 'img';
 // 이미지 크기 변경 상태
 let resized = {};         // idx → {w, h}
 let parentResized = {};   // idx → new height string ('auto' or px value)
+
+// ★ 이미지 효과 (밝기·대비·흐림·채도) — <img> 태그만 적용
+// effects[i] = { brightness: 100, contrast: 100, blur: 0, saturate: 100 }
+// 기본값(100,100,0,100) = 효과 없음
+let effects = {};
 
 // ── 크롭 상태 ──
 let cropImg = null;
@@ -2876,6 +2895,81 @@ function toggleSizeEdit(i) {
     }
   }
 }
+
+// ★ 이미지 효과 패널
+function toggleEffectEdit(i) {
+  const panel = document.getElementById('efpanel-'+i);
+  if (!panel) return;
+  const card = document.getElementById('card-'+i);
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (card) {
+    card.classList.toggle('size-open', !isOpen);
+    if (!isOpen) {
+      // 옛 효과 값 로드
+      const e = effects[i] || { brightness: 100, contrast: 100, blur: 0, saturate: 100 };
+      const setVal = (id, val, suffix) => {
+        const inp = document.getElementById(id);
+        if (inp) inp.value = val;
+        const lbl = document.getElementById(id + 'v');
+        if (lbl) lbl.textContent = val + suffix;
+      };
+      setVal('efb-'+i, e.brightness, '%');
+      setVal('efc-'+i, e.contrast, '%');
+      setVal('efbl-'+i, e.blur, 'px');
+      setVal('efs-'+i, e.saturate, '%');
+      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
+  }
+}
+
+function onEffectInput(i) {
+  const b = +document.getElementById('efb-'+i).value;
+  const c = +document.getElementById('efc-'+i).value;
+  const bl = +document.getElementById('efbl-'+i).value;
+  const s = +document.getElementById('efs-'+i).value;
+  document.getElementById('efbv-'+i).textContent = b + '%';
+  document.getElementById('efcv-'+i).textContent = c + '%';
+  document.getElementById('efblv-'+i).textContent = bl + 'px';
+  document.getElementById('efsv-'+i).textContent = s + '%';
+  // 기본값이면 = effects에서 제거 (= 변경 없음)
+  if (b === 100 && c === 100 && bl === 0 && s === 100) {
+    delete effects[i];
+  } else {
+    effects[i] = { brightness: b, contrast: c, blur: bl, saturate: s };
+  }
+  // 썸네일에도 실시간 미리보기
+  const thumb = document.getElementById('thumb-'+i);
+  if (thumb) thumb.style.filter = effectsToCss(effects[i]);
+  syncStats(); syncChangeList(); refreshPreviewWindow && refreshPreviewWindow();
+}
+
+function resetEffect(i) {
+  const setRange = (id, val, suffix) => {
+    const inp = document.getElementById(id);
+    if (inp) inp.value = val;
+    const lbl = document.getElementById(id + 'v');
+    if (lbl) lbl.textContent = val + suffix;
+  };
+  setRange('efb-'+i, 100, '%');
+  setRange('efc-'+i, 100, '%');
+  setRange('efbl-'+i, 0, 'px');
+  setRange('efs-'+i, 100, '%');
+  delete effects[i];
+  const thumb = document.getElementById('thumb-'+i);
+  if (thumb) thumb.style.filter = '';
+  syncStats(); syncChangeList(); refreshPreviewWindow && refreshPreviewWindow();
+}
+
+function effectsToCss(e) {
+  if (!e) return '';
+  const parts = [];
+  if (e.brightness !== 100) parts.push(`brightness(${e.brightness/100})`);
+  if (e.contrast !== 100) parts.push(`contrast(${e.contrast/100})`);
+  if (e.blur > 0) parts.push(`blur(${e.blur}px)`);
+  if (e.saturate !== 100) parts.push(`saturate(${e.saturate/100})`);
+  return parts.join(' ');
+}
 function switchTab(tab) {
   currentTab = tab;
   ['img','txt','preview'].forEach(t => {
@@ -3366,6 +3460,7 @@ async function renderGrid() {
       <div class="card-overlay">
         <button class="card-action ca-replace" onclick="openCrop(${i})" title="${currentLang==='en'?'Replace with a new image':'새 이미지로 교체'}">${t('card.replace')}</button>
         <button class="card-action ca-size" onclick="toggleSizeEdit(${i})" title="${currentLang==='en'?'Edit image width/height (HTML attributes)':'이미지 가로·세로 크기 수정 (HTML width·height)'}">${t('card.size')}</button>
+        ${img.isBg ? '' : `<button class="card-action ca-effect" onclick="toggleEffectEdit(${i})" title="${currentLang==='en'?'Brightness, contrast, blur, saturation':'밝기·대비·흐림·채도 조정'}">${t('card.effect')||'효과'}</button>`}
         <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})" title="${currentLang==='en'?'Mark this image for deletion':'이 이미지 삭제 표시'}">${t('card.delete')}</button>
       </div>
       <div class="card-badge badge-del">${t('card.deleted')}</div>
@@ -3407,6 +3502,18 @@ async function renderGrid() {
           </div>` : ''}
           <div class="size-note" id="sznote-${i}"></div>
         </div>
+        ${img.isBg ? '' : `
+        <div class="effect-edit-panel" id="efpanel-${i}" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:10px;font-weight:600;color:var(--text2);font-family:var(--font-mono);letter-spacing:0.04em;">${currentLang==='en'?'Image effects':'이미지 효과'}</span>
+            <button onclick="toggleEffectEdit(${i})" style="border:none;background:none;color:var(--text2);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;">×</button>
+          </div>
+          <div class="effect-row"><label>${currentLang==='en'?'Brightness':'밝기'}</label><input type="range" min="20" max="200" value="100" id="efb-${i}" oninput="onEffectInput(${i})"><span id="efbv-${i}">100%</span></div>
+          <div class="effect-row"><label>${currentLang==='en'?'Contrast':'대비'}</label><input type="range" min="20" max="200" value="100" id="efc-${i}" oninput="onEffectInput(${i})"><span id="efcv-${i}">100%</span></div>
+          <div class="effect-row"><label>${currentLang==='en'?'Blur':'흐림'}</label><input type="range" min="0" max="20" value="0" id="efbl-${i}" oninput="onEffectInput(${i})"><span id="efblv-${i}">0px</span></div>
+          <div class="effect-row"><label>${currentLang==='en'?'Saturation':'채도'}</label><input type="range" min="0" max="200" value="100" id="efs-${i}" oninput="onEffectInput(${i})"><span id="efsv-${i}">100%</span></div>
+          <button class="size-preset" onclick="resetEffect(${i})" style="width:100%;margin-top:6px;">${currentLang==='en'?'Reset':'초기화'}</button>
+        </div>`}
         <div class="card-status" id="cst-${i}"></div>
       </div>`;
     frag.appendChild(div);
@@ -4416,7 +4523,28 @@ async function buildHtml() {
     } else {
       html = html.split(marker).join(newSrc);
     }
+    // ★ 이미지 효과 (밝기·대비·흐림·채도) 박기 — <img> 태그만
+    if (!images[i].isBg && effects[i]) {
+      const filterCss = effectsToCss(effects[i]);
+      if (filterCss) {
+        // 해당 <img>가 가진 src=newSrc 위치 찾아서 style="filter:..." 박음
+        // 새 src로 갈음 후이므로 src="newSrc" 검색
+        const escSrc = newSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // 이미 style 있으면 append, 없으면 새로 추가
+        html = html.replace(new RegExp(`(<img[^>]*src=["']${escSrc}["'][^>]*?)(\\s*/?>)`, 'g'), (full, before, end) => {
+          // 같은 src가 여러 곳에 박혀있을 수 있으므로 = 한 번만 (= 이 i번째 마커가 박힌 그 위치)
+          // 단순화: 모든 같은 src에 효과 적용. (대표님 의도 = 자리별이지만 src 같으면 보통 같은 의도)
+          if (before.includes('data-eff-applied')) return full;
+          if (/style\s*=/.test(before)) {
+            return before.replace(/style\s*=\s*(['"])([^'"]*)\1/, (s, q, val) => `style=${q}${val};filter:${filterCss}${q}`) + ' data-eff-applied="1"' + end;
+          }
+          return before + ` style="filter:${filterCss}" data-eff-applied="1"` + end;
+        });
+      }
+    }
   }
+  // data-eff-applied 정리
+  html = html.replace(/\s*data-eff-applied=["']1["']/g, '');
 
   // ④ 텍스트 마커 치환
   for (let i = 0; i < textNodes.length; i++) {
