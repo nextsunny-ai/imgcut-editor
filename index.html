@@ -3212,9 +3212,9 @@ async function processHtmlFile(file) {
     const marker = `%%IMG_${i}%%`;
     const { start, end, isBg } = match;
     if (isBg) {
-      // url("path") → url("%%IMG_N%%")
+      // ★ url("X") / url('X') / url(X) → 원본 quote 보존 (inline style의 quote 충돌 방지)
       const original = text.slice(start, end);
-      const replaced = original.replace(/url\(["']?[^"')]+["']?\)/, `url("${marker}")`);
+      const replaced = original.replace(/url\(\s*(["']?)([^"')]+)\1\s*\)/, `url($1${marker}$1)`);
       html = html.slice(0, start) + replaced + html.slice(end);
     } else {
       html = html.slice(0, start) + `src="${marker}"` + html.slice(end);
@@ -3234,8 +3234,8 @@ async function processHtmlFile(file) {
     const escSrc = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     // <img src="X"> → src="MARKER" (이미 박힌 곳은 이미 마커라 정규식 안 잡힘)
     html = html.replace(new RegExp(`src=["']${escSrc}["']`, 'g'), `src="${marker}"`);
-    // url("X") / url('X') / url(X) → url("MARKER")
-    html = html.replace(new RegExp(`url\\(\\s*["']?${escSrc}["']?\\s*\\)`, 'g'), `url("${marker}")`);
+    // ★ url("X") / url('X') / url(X) → 원본 quote 보존 (inline style의 작은따옴표 ↔ 큰따옴표 충돌 방지)
+    html = html.replace(new RegExp(`url\\(\\s*(["']?)${escSrc}\\1\\s*\\)`, 'g'), `url($1${marker}$1)`);
   }
 
   currentHtml = html; // 마커가 들어간 템플릿 저장
