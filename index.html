@@ -2906,8 +2906,10 @@ function toggleEffectEdit(i) {
   if (card) {
     card.classList.toggle('size-open', !isOpen);
     if (!isOpen) {
-      // 옛 효과 값 로드
-      const e = effects[i] || { brightness: 100, contrast: 100, blur: 0, saturate: 100 };
+      // ★ 패널 열 때 = effects[i] 박음 (= 사용자가 효과 직접 제어 의도)
+      // 옛 CSS 디자인 효과 (예: NORY CITY의 .section-bg-img filter)도 override
+      if (!effects[i]) effects[i] = { brightness: 100, contrast: 100, blur: 0, saturate: 100 };
+      const e = effects[i];
       const setVal = (id, val, suffix) => {
         const inp = document.getElementById(id);
         if (inp) inp.value = val;
@@ -2918,6 +2920,10 @@ function toggleEffectEdit(i) {
       setVal('efc-'+i, e.contrast, '%');
       setVal('efbl-'+i, e.blur, 'px');
       setVal('efs-'+i, e.saturate, '%');
+      // 미리보기 갱신 (= 옛 CSS 효과 무효화 적용)
+      syncStats(); syncChangeList();
+      if (currentTab === 'preview' && typeof refreshPreview === 'function') refreshPreview();
+      if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
       setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
     }
   }
@@ -2932,16 +2938,14 @@ function onEffectInput(i) {
   document.getElementById('efcv-'+i).textContent = c + '%';
   document.getElementById('efblv-'+i).textContent = bl + 'px';
   document.getElementById('efsv-'+i).textContent = s + '%';
-  // 기본값이면 = effects에서 제거 (= 변경 없음)
-  if (b === 100 && c === 100 && bl === 0 && s === 100) {
-    delete effects[i];
-  } else {
-    effects[i] = { brightness: b, contrast: c, blur: bl, saturate: s };
-  }
+  // ★ 패널 열린 한 = effects[i] 박힘 = CSS override 의도
+  effects[i] = { brightness: b, contrast: c, blur: bl, saturate: s };
   // 썸네일에도 실시간 미리보기
   const thumb = document.getElementById('thumb-'+i);
   if (thumb) thumb.style.filter = effectsToCss(effects[i]);
-  syncStats(); syncChangeList(); refreshPreviewWindow && refreshPreviewWindow();
+  syncStats(); syncChangeList();
+  if (currentTab === 'preview' && typeof refreshPreview === 'function') refreshPreview();
+  if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
 }
 
 function resetEffect(i) {
@@ -2963,12 +2967,8 @@ function resetEffect(i) {
 
 function effectsToCss(e) {
   if (!e) return '';
-  const parts = [];
-  if (e.brightness !== 100) parts.push(`brightness(${e.brightness/100})`);
-  if (e.contrast !== 100) parts.push(`contrast(${e.contrast/100})`);
-  if (e.blur > 0) parts.push(`blur(${e.blur}px)`);
-  if (e.saturate !== 100) parts.push(`saturate(${e.saturate/100})`);
-  return parts.join(' ');
+  // ★ 항상 4가지 모두 출력 = 옛 CSS 디자인 효과 override (NORY CITY 같은 케이스)
+  return `brightness(${e.brightness/100}) contrast(${e.contrast/100}) blur(${e.blur}px) saturate(${e.saturate/100})`;
 }
 function switchTab(tab) {
   currentTab = tab;
