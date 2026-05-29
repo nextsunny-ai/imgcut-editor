@@ -3064,10 +3064,10 @@ function renderTonePanel() {
 
   root.innerHTML = `
     <div style="padding:16px 20px;overflow:auto;flex:1;">
-      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">옛 컬러 패턴 ↔ 새 톤 선택. 폰트도 드롭다운으로.</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">기존 컬러 패턴 ↔ 새 톤 선택. 폰트도 드롭다운으로.</div>
 
-      <!-- 옛 팔레트 -->
-      <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:8px;">옛 컬러 (= 이 페이지)</div>
+      <!-- 기존 팔레트 -->
+      <div style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:8px;">기존 컬러 (= 이 페이지)</div>
       <div style="display:flex;gap:12px;padding:12px;background:var(--surface2);border-radius:6px;margin-bottom:20px;">
         ${currentColorsHTML}
       </div>
@@ -3140,7 +3140,7 @@ function toneDebouncedRefresh() {
 // 프리셋 컬러 팔레트 (= 사용자가 선택할 톤)
 // 각 팔레트 = 5개 색 = [메인, 보조, 강조, 텍스트, 배경]
 const PRESET_PALETTES = [
-  { id: 'nory', name: 'NORY CITY (옛)', colors: ['#ff2a55', '#29d2ff', '#f5c656', '#0a0817', '#f6f4ec'] },
+  { id: 'nory', name: 'NORY CITY (기존)', colors: ['#ff2a55', '#29d2ff', '#f5c656', '#0a0817', '#f6f4ec'] },
   { id: 'sunset', name: '석양 · Sunset', colors: ['#ff6b6b', '#feca57', '#ff9ff3', '#2c2c54', '#fff5e1'] },
   { id: 'ocean', name: '바다 · Ocean', colors: ['#0077b6', '#00b4d8', '#90e0ef', '#03045e', '#caf0f8'] },
   { id: 'forest', name: '숲 · Forest', colors: ['#2d6a4f', '#52b788', '#95d5b2', '#1b4332', '#f1faee'] },
@@ -3207,16 +3207,22 @@ function detectDesignTone(html) {
     });
   }
 
-  // ③ 폰트 = font-family 사용 빈도 상위 1-3개
+  // ③ 폰트 = font-family stack 안 모든 폰트 추출 (= 한 페이지에 보통 한글+영문+모노 3-4개)
   const fontCount = {};
   const fontRe = /font-family\s*:\s*([^;{}]+)/g;
+  // generic family 제외 (= sans-serif, serif 등은 실제 폰트 X)
+  const GENERIC = /^(sans-serif|serif|monospace|system-ui|cursive|fantasy|ui-sans-serif|ui-serif|ui-monospace|ui-rounded|emoji|math|fangsong|-apple-system|BlinkMacSystemFont|Segoe UI|Apple SD Gothic Neo|Malgun Gothic)$/i;
   while ((m = fontRe.exec(html)) !== null) {
-    const raw = m[1].trim().replace(/['"]/g, '').replace(/\s*,.*$/, '').trim();
-    if (!raw || raw.length > 50) continue;
-    if (/var\(|inherit|initial|unset/.test(raw)) continue;
-    fontCount[raw] = (fontCount[raw] || 0) + 1;
+    // 전체 stack split = ['Pretendard', 'Noto Sans KR', 'sans-serif']
+    const stack = m[1].split(',').map(s => s.trim().replace(/['"]/g, '').trim()).filter(Boolean);
+    stack.forEach(name => {
+      if (!name || name.length > 50) return;
+      if (/var\(|inherit|initial|unset/.test(name)) return;
+      if (GENERIC.test(name)) return;  // generic family 제외
+      fontCount[name] = (fontCount[name] || 0) + 1;
+    });
   }
-  Object.entries(fontCount).sort((a,b) => b[1] - a[1]).slice(0, 3)
+  Object.entries(fontCount).sort((a,b) => b[1] - a[1]).slice(0, 4)
     .forEach(([name, cnt]) => fonts.push({ name, original: name, current: name, count: cnt }));
 
   return { colors: colorSlots, fonts };
