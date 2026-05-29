@@ -3151,8 +3151,8 @@ async function processHtmlFile(file) {
     if (/fonts\.|googleapis\.com\/css|cdn.*\.js/i.test(src)) continue;
     const before = text.slice(Math.max(0, m.index - 10), m.index);
     if (!/<img[^>]*$/.test(text.slice(Math.max(0, m.index - 200), m.index)) && !before.includes('<img')) continue;
-    // ★ 같은 src dedup (= 동일 파일이 여러 <img>에 쓰여도 한 카드만. 마커 박을 때 모든 위치 다 갈음)
-    if (matches.some(mm => mm.src === src)) continue;
+    // ★ dedup 제거 = 같은 파일이라도 위치마다 별도 카드 (= 대표님 의도: 자리별 카운팅)
+    //   사용자가 #N 갈음 = 그 위치만 갈음 (= 다른 위치의 같은 파일 안 건드림)
     const imgTagStart = text.lastIndexOf('<img', m.index);
     const imgTagEnd = text.indexOf('>', m.index) + 1;
     const imgTagFull = imgTagStart >= 0 ? text.slice(imgTagStart, imgTagEnd) : '';
@@ -3190,8 +3190,9 @@ async function processHtmlFile(file) {
   while ((bgM = bgRegex.exec(text)) !== null) {
     const src = bgM[1];
     if (!src || src.includes('.woff') || src.includes('.ttf') || src.includes('.svg#') || /\.(js|css|eot|json|xml)(\?|$)/i.test(src) || /fonts\.|googleapis\.com\/css/i.test(src)) continue;
-    const alreadyCaptured = matches.some(mm => mm.src === src);
-    if (alreadyCaptured) continue;
+    // ★ dedup 제거 = 같은 src라도 다른 위치 = 별도 카드 (대표님 의도: 자리별 카운팅)
+    //   단, ① <img> 패턴이 이미 잡은 정확한 같은 byte offset만 skip (= 중복 매치 방지)
+    if (matches.some(mm => mm.start === bgM.index)) continue;
     matches.push({
       src, start: bgM.index, end: bgM.index + bgM[0].length,
       fullMatch: bgM[0], imgTagFull: '', imgTagStart: -1, imgTagEnd: -1,
@@ -3221,22 +3222,9 @@ async function processHtmlFile(file) {
     }
   }
 
-  // ★ dedup으로 빠진 같은 src의 추가 위치들도 마커로 갈음
-  // 예: A안 = crowd-color.webp가 외부 CSS hero 배경 + inline <img> + inline style 3곳 사용
-  // → matches에는 1개만 있고, 마커도 1곳만 박혔음
-  // → 사용자가 갈음 시 한 곳만 바뀜 → hero 배경 안 바뀌는 사고
-  // → 추가 위치 다 마커로 박아서 한 번에 모두 갈음
-  for (let i = 0; i < matches.length; i++) {
-    const m = matches[i];
-    const marker = `%%IMG_${i}%%`;
-    const src = m.src;
-    if (!src) continue;
-    const escSrc = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // <img src="X"> → src="MARKER" (이미 박힌 곳은 이미 마커라 정규식 안 잡힘)
-    html = html.replace(new RegExp(`src=["']${escSrc}["']`, 'g'), `src="${marker}"`);
-    // ★ url("X") / url('X') / url(X) → 원본 quote 보존 (inline style의 작은따옴표 ↔ 큰따옴표 충돌 방지)
-    html = html.replace(new RegExp(`url\\(\\s*(["']?)${escSrc}\\1\\s*\\)`, 'g'), `url($1${marker}$1)`);
-  }
+  // ★ 옛 사고 fix: 같은 src 다른 위치도 마커로 갈음 = 모든 위치 동시 변경 (= 카드 1개)
+  //   대표님 의도 = 각 위치별 별도 카드 = 각 위치만 갈음 = 다른 같은 파일 위치 안 건드림
+  //   → step 2 제거 (= 자리별 마커만 = step 1 결과 그대로)
 
   currentHtml = html; // 마커가 들어간 템플릿 저장
 
