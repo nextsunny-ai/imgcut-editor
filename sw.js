@@ -2,7 +2,7 @@
  * 오프라인 캐싱: 첫 로드 시 핵심 자산 캐시, 이후 같은 도메인 GET = cache-first
  * 동적 자원(폰트 CDN 등)도 자동 캐싱
  */
-const CACHE = 'sunny-editor-v1-1-8';
+const CACHE = 'sunny-editor-v1-1-9';
 const CORE_ASSETS = [
   '/',
   '/index.html',
