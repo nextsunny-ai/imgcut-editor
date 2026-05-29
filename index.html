@@ -2929,6 +2929,7 @@ function toggleEffectEdit(i) {
   }
 }
 
+let effectDebounceTimer = null;
 function onEffectInput(i) {
   const b = +document.getElementById('efb-'+i).value;
   const c = +document.getElementById('efc-'+i).value;
@@ -2940,12 +2941,16 @@ function onEffectInput(i) {
   document.getElementById('efsv-'+i).textContent = s + '%';
   // ★ 패널 열린 한 = effects[i] 박힘 = CSS override 의도
   effects[i] = { brightness: b, contrast: c, blur: bl, saturate: s };
-  // 썸네일에도 실시간 미리보기
+  // 카드 썸네일 = 즉시 실시간 미리보기
   const thumb = document.getElementById('thumb-'+i);
   if (thumb) thumb.style.filter = effectsToCss(effects[i]);
   syncStats(); syncChangeList();
-  if (currentTab === 'preview' && typeof refreshPreview === 'function') refreshPreview();
-  if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
+  // ★ 미리보기 = debounce 300ms (= 슬라이더 부드럽게)
+  if (effectDebounceTimer) clearTimeout(effectDebounceTimer);
+  effectDebounceTimer = setTimeout(() => {
+    if (typeof refreshPreview === 'function') refreshPreview();
+    if (typeof refreshPreviewWindow === 'function') refreshPreviewWindow();
+  }, 300);
 }
 
 function resetEffect(i) {
