@@ -3454,24 +3454,38 @@ function renderTextList() {
     const { label, cls } = tagLabel(node.tag);
     // ★ 깨끗한 텍스트만 표시 (= display) — HTML 태그 + style 속성 안 노출
     const cleanText = node.display || node.original;
-    const preview = cleanText.length > 80 ? cleanText.slice(0,80)+'…' : cleanText;
+    // ★ 편집 상태 반영 (복구·한영전환 후 재렌더에서도 수정/삭제 표시 유지)
+    const isEdited = typeof txtEdited !== 'undefined' && txtEdited[i] !== undefined;
+    const isDeleted = typeof txtDeleted !== 'undefined' && txtDeleted.has(i);
+    const inputValue = isEdited ? txtEdited[i] : cleanText;
+    const preview = (() => {
+      const src = isEdited ? txtEdited[i] : cleanText;
+      return src.length > 80 ? src.slice(0,80)+'…' : src;
+    })();
+    const cardCls = 'txt-card' + (isDeleted ? ' txt-deleted' : (isEdited ? ' txt-edited' : ''));
+    const delBtnLabel = isDeleted ? t('st.restore') : t('card.delete');
+    const delBtnCls = 'txt-action danger' + (isDeleted ? ' restore' : '');
+    const inpCls = 'txt-input' + (isDeleted ? ' deleted-input' : '');
+    let statusTxt = '', statusCls = 'txt-status';
+    if (isDeleted) { statusTxt = t('st.willDelete'); statusCls = 'txt-status deleted'; }
+    else if (isEdited) { statusTxt = t('st.edited'); statusCls = 'txt-status edited'; }
     return `
-    <div class="txt-card" id="tcard-${i}" data-tidx="${i}" data-tag="${node.tag}">
+    <div class="${cardCls}" id="tcard-${i}" data-tidx="${i}" data-tag="${node.tag}">
       <div class="txt-card-header">
         <span class="txt-type-badge ${cls}">${label}</span>
         <span class="txt-card-path">${escapeHtml(preview)}</span>
         <div class="txt-card-actions">
           <button class="txt-action" onclick="toggleOriginal(${i})">원본 보기</button>
-          <button class="txt-action danger" id="tdelbtn-${i}" onclick="toggleTxtDelete(${i})">삭제</button>
+          <button class="${delBtnCls}" id="tdelbtn-${i}" onclick="toggleTxtDelete(${i})">${delBtnLabel}</button>
         </div>
       </div>
       <div class="txt-card-body">
         <div class="txt-original" id="torig-${i}">원본: ${escapeHtml(node.original)}</div>
-        <textarea class="txt-input" id="tinp-${i}"
+        <textarea class="${inpCls}" id="tinp-${i}"
           oninput="onTxtInput(${i})"
           placeholder="텍스트를 수정하세요..."
-          rows="${cleanText.length > 60 ? 3 : 1}">${escapeHtml(cleanText)}</textarea>
-        <div class="txt-status" id="tst-${i}"></div>
+          rows="${inputValue.length > 60 ? 3 : 1}">${escapeHtml(inputValue)}</textarea>
+        <div class="${statusCls}" id="tst-${i}">${statusTxt}</div>
       </div>
     </div>`;
   }).join('');
@@ -3762,6 +3776,10 @@ async function renderGrid() {
       thumb = await makeThumb(img.src); // data: → 리사이즈
     }
     img.thumb = thumb;
+    // ★ 편집 상태 반영 (복구·한영전환 후 재렌더에서도 삭제/교체 표시 유지)
+    const isDeleted = typeof deleted !== 'undefined' && deleted.has(i);
+    const isReplaced = typeof replaced !== 'undefined' && replaced[i] !== undefined;
+    if (isReplaced) thumb = replaced[i]; // 교체된 이미지는 교체본 썸네일로
 
     // 현재 크기 표시 텍스트
     const curW = img.styleW || img.attrW || '';
@@ -3769,13 +3787,18 @@ async function renderGrid() {
     const sizeHint = curW || curH ? `${curW||'auto'} × ${curH||'auto'}` : t('card.sizeAuto');
     const parentHint = img.parentHeight ? `컨테이너 높이: ${img.parentHeight}` : '';
 
+    // ★ 효과 복원 = 썸네일 filter
+    const filterCss = (typeof effects !== 'undefined' && effects[i] && typeof effectsToCss === 'function')
+      ? effectsToCss(effects[i]) : '';
+    const thumbStyle = (isLocal && !thumb ? 'display:none' : '') + (filterCss ? `;filter:${filterCss}` : '');
+
     const div = document.createElement('div');
-    div.className = 'img-card';
+    div.className = 'img-card' + (isDeleted ? ' deleted' : '') + (isReplaced ? ' replaced' : '');
     div.id = 'card-' + i;
     div.dataset.idx = i;
     div.innerHTML = `
-      <img class="card-thumb" id="thumb-${i}" src="${thumb}" data-orig="${thumb}" alt=""
-        style="${isLocal && !thumb ? 'display:none' : ''}">
+      <img class="card-thumb" id="thumb-${i}" src="${thumb}" data-orig="${img.thumb}" alt=""
+        style="${thumbStyle}">
       ${isLocal && !thumb ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface2);padding:8px;gap:4px;">
         <div style="font-size:10px;color:var(--text3);text-align:center;word-break:break-all;line-height:1.4;font-family:var(--font-mono);">${img.src}</div>
         <div style="font-size:10px;color:var(--accent);font-weight:600;font-family:var(--font-mono);">${t('card.replaceNeeded')}</div>
@@ -3784,7 +3807,7 @@ async function renderGrid() {
         <button class="card-action ca-replace" onclick="openCrop(${i})" title="${currentLang==='en'?'Replace with a new image':'새 이미지로 교체'}">${t('card.replace')}</button>
         <button class="card-action ca-size" onclick="toggleSizeEdit(${i})" title="${currentLang==='en'?'Edit image width/height (HTML attributes)':'이미지 가로·세로 크기 수정 (HTML width·height)'}">${t('card.size')}</button>
         ${img.isBg ? '' : `<button class="card-action ca-effect" onclick="toggleEffectEdit(${i})" title="${currentLang==='en'?'Brightness, contrast, blur, saturation':'밝기·대비·흐림·채도 조정'}">${t('card.effect')||'효과'}</button>`}
-        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})" title="${currentLang==='en'?'Mark this image for deletion':'이 이미지 삭제 표시'}">${t('card.delete')}</button>
+        <button class="card-action ca-delete" id="delbtn-${i}" onclick="toggleDelete(${i})" title="${currentLang==='en'?'Mark this image for deletion':'이 이미지 삭제 표시'}">${isDeleted ? t('card.restoreDel') : t('card.delete')}</button>
       </div>
       <div class="card-badge badge-del">${t('card.deleted')}</div>
       <div class="card-badge badge-rep">${t('card.replaced')}</div>
@@ -3837,7 +3860,7 @@ async function renderGrid() {
           <div class="effect-row"><label>${currentLang==='en'?'Saturation':'채도'}</label><input type="range" min="0" max="200" value="100" id="efs-${i}" oninput="onEffectInput(${i})"><span id="efsv-${i}">100%</span></div>
           <button class="size-preset" onclick="resetEffect(${i})" style="width:100%;margin-top:6px;">${currentLang==='en'?'Reset':'초기화'}</button>
         </div>`}
-        <div class="card-status" id="cst-${i}"></div>
+        <div class="card-status" id="cst-${i}">${isDeleted ? t('st.willDelete') : (isReplaced ? t('st.willReplace') : '')}</div>
       </div>`;
     frag.appendChild(div);
     if (i % 4 === 0) { setProg('썸네일 생성 중...', 30 + Math.round(60*i/images.length)); await tick(); }
@@ -4543,6 +4566,21 @@ function openAutosaveDB() {
   });
 }
 
+// currentHtml 은 텍스트·이미지가 %%TXT_n%% / %%IMG_n%% 마커로 치환된 상태.
+// 마커를 실제 원본 내용으로 역치환한 "원본 HTML" 문자열을 반환.
+// 자동 저장(복구 시 재파싱용)과 ZIP 원본 추출이 동일 로직을 공유 (DRY).
+function rawHtmlFromCurrent() {
+  if (!currentHtml) return currentHtml;
+  let raw = currentHtml;
+  for (let i = 0; i < images.length; i++) {
+    raw = raw.split('%%IMG_' + i + '%%').join(images[i].src);
+  }
+  for (let i = 0; i < textNodes.length; i++) {
+    raw = raw.split('%%TXT_' + i + '%%').join(textNodes[i].original);
+  }
+  return raw;
+}
+
 async function autosaveNow() {
   if (!currentHtml || !currentFileName) return; // 파일 안 불러왔으면 저장 X
   try {
@@ -4551,7 +4589,7 @@ async function autosaveNow() {
       version: 1,
       savedAt: Date.now(),
       fileName: currentFileName,
-      currentHtml,
+      currentHtml: rawHtmlFromCurrent(),  // ★ 마커 역치환한 원본 HTML 저장 — 복구 시 깨끗하게 재파싱
       uploadMode: typeof uploadMode !== 'undefined' ? uploadMode : 'html',
       siteBundleName: siteBundle ? siteBundle.name : null,
       siteBundleHtmlPath: siteBundle ? siteBundle.htmlPath : null,
@@ -4681,30 +4719,11 @@ async function restoreAutosave(snap) {
     if (typeof detectedFonts !== 'undefined' && Array.isArray(snap.detectedFonts)) {
       detectedFonts = snap.detectedFonts;
     }
-    // UI 다시 그리기
+    // UI 다시 그리기 — renderGrid·renderTextList 가 편집 상태(삭제·교체·효과·텍스트수정)를
+    // 직접 반영하므로 별도 수동 보정 불필요 (단일 소스).
     await renderGrid();
     if (typeof renderTextList === 'function') renderTextList();
     if (typeof applyFilter === 'function') applyFilter();
-    // 교체된 이미지 카드 = 복원된 dataURL로 thumb 갱신
-    Object.keys(replaced).forEach(i => {
-      const thumb = document.getElementById('thumb-' + i);
-      if (thumb) thumb.src = replaced[i];
-      const card = document.getElementById('card-' + i);
-      if (card) card.classList.add('replaced');
-      const cst = document.getElementById('cst-' + i);
-      if (cst) cst.textContent = t('st.willReplace');
-    });
-    deleted.forEach(i => {
-      const card = document.getElementById('card-' + i);
-      if (card) card.classList.add('deleted');
-    });
-    // ★ effects 복구 = 카드 썸네일에도 적용
-    if (typeof effects !== 'undefined') {
-      Object.keys(effects).forEach(i => {
-        const thumb = document.getElementById('thumb-' + i);
-        if (thumb) thumb.style.filter = effectsToCss(effects[i]);
-      });
-    }
     syncStats(); syncChangeList();
     hideProg();
     toast(t('msg.restored') || '복구 완료');
@@ -5079,15 +5098,9 @@ async function downloadZip() {
       || Object.keys(txtEdited).length > 0 || txtDeleted.size > 0
       || Object.keys(resized).length > 0 || Object.keys(parentResized).length > 0;
 
-    // ① 원본 HTML 복원 (마커 → 실제 내용으로)
+    // ① 원본 HTML 복원 (마커 → 실제 내용으로) — 공용 헬퍼 사용 (DRY)
     setProg('HTML 복원 중...', 20); await tick();
-    let originalHtml = currentHtml;
-    for (let i = 0; i < images.length; i++) {
-      originalHtml = originalHtml.split('%%IMG_' + i + '%%').join(images[i].src);
-    }
-    for (let i = 0; i < textNodes.length; i++) {
-      originalHtml = originalHtml.split('%%TXT_' + i + '%%').join(textNodes[i].original);
-    }
+    const originalHtml = rawHtmlFromCurrent();
     zip.file(base + '_원본.html', originalHtml);
 
     // ② 수정된 HTML (변경사항 있을 때만)
